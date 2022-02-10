@@ -6,9 +6,9 @@ date: "2/8/2022"
 ​---
 ---
 
-# Data visualization: flights at ABIA
+# 1) Data visualization: flights at ABIA
 
-## Worst Destination Airports
+## 1.1 Worst Destination Airports
 
 What are the bad airports to fly to if you want to depart from Austin?
 We measure how “bad” these airports are with the proportion of delayed
@@ -352,7 +352,7 @@ Months
 
 </div>
 
-## Best Month to Depart from AUS
+## 1.2 Best Month to Depart from AUS
 
 According to the following graph, it shows that September has the lowest
 delay rate in 2008.
@@ -366,7 +366,7 @@ Figure 4: Delay Rate by Month in 2008
 
 </div>
 
-# Wrangling the Billboard Top 100
+# 2) Wrangling the Billboard Top 100
 
 ## Part A
 
@@ -523,7 +523,7 @@ Figure 6: Artists Having over 30 Ten-Week-Hits Songs
 
 </div>
 
-# Wrangling the Olympics
+# 3) Wrangling the Olympics
 
 ## Part A
 
@@ -573,7 +573,7 @@ Swimmers’ Age After Female Participation in Olympics
 
 </div>
 
-# K-nearest neighbors
+# 4) K-nearest neighbors
 
 <div class="figure" style="text-align: center">
 
