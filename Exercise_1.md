@@ -372,7 +372,7 @@ Figure 4: Delay Rate by Month in 2008
 
 <table class="table" style="margin-left: auto; margin-right: auto;">
 <caption>
-Table 2:Top 10 Most Popular Songs Since 1958
+Table 2: Top 10 Most Popular Songs Since 1958
 </caption>
 <thead>
 <tr>
