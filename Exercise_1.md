@@ -13,9 +13,11 @@ Personally, we focus on flights being cancelled or with arrival delays
 larger than 30 minutes, which are extremely annoying to travelers. The
 “Bad Index” with which we rate destination airports are formally given
 by
+
 $$
 \\text{Bad Index}\_{\\text{Destination}} = \\frac{\\text{# of major delay + # of cancelled}}{\\text{# from AUS to Destination}},
 $$
+
 where \# refers to the number of flights.
 
 The *yearly top 10 worst destination airports* of 2008 together with
