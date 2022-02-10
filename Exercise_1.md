@@ -14,7 +14,9 @@ larger than 30 minutes, which are extremely annoying to travelers. The
 “Bad Index” with which we rate destination airports are formally given
 by
 
-$\\text{Bad Index}\_{\\text{Destination}} = \\frac{\\text{# of major delay + # of cancelled}}{\\text{# from AUS to Destination}},$
+$$
+\text{Bad Index}_{\text{Destination}} = \frac{\text{# of major delay + # of cancelled}}{\text{# from AUS to Destination}},
+$$
 
 where \# refers to the number of flights.
 
