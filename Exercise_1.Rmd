@@ -2,7 +2,7 @@
 title: "Exercise - 1"
 author: "Jipeng Cheng, Weidi Hou, Yu-Ting Huang"
 date: "2/8/2022"
-output: md_document
+output: github_document
 ---
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
@@ -18,9 +18,9 @@ What are the bad airports to fly to if you want to depart from Austin? We measur
 - Cancelled: flights being cancelled
 
 Personally, we focus on flights being cancelled or with arrival delays larger than 30 minutes, which are extremely annoying to travelers. The "Bad Index" with which we rate destination airports are formally given by
-$$
-\text{Bad Index}_{\text{Destination}} = \frac{\text{# of major delay + # of cancelled}}{\text{# from AUS to Destination}},
-$$
+
+the sum of **# of major delayed flights** and **# of cancelled flights** divided by the **# from AUS to Destination**,
+
 where # refers to the number of flights. 
 
 The *yearly top 10 worst destination airports* of 2008 together with their "Bad Index" are shown in Figure 1. **Newark airport** is the worst airport given our rating system: the flights from Austin to Newark are most likely to be delayed by over 30 minutes or cancelled. The second follows **JFK airport** in New York. Considering that EWR also serves The NYC Metropolitan Area, it seems that choosing **New York** as destination is the real cause. Busy city and busy airports!
@@ -31,10 +31,8 @@ library(mosaic)
 library(dplyr)
 library(stringr)
 library(data.table)
-library(lubridate)
 library(ggplot2)
 library(tidyverse)
-library(ggplot2)
 library(rsample)  
 library(caret)
 library(modelr)
@@ -138,8 +136,7 @@ by_month_table = bad_airports_bymonth_top5 %>%
             Fourth = Dest[bad_rank ==4],
             Fifth = Dest[bad_rank ==5])
 
-by_month_table %>%
-  knitr::kable(caption = "Table 1: Top 5 Worst Destinations across Months")
+knitr::kable(by_month_table, caption = "Table 1: Top 5 Worst Destinations across Months")
 ```
 
 A more sketchy way to capture the variability is counting how many time airports occur in the monthly lists of top 5 worst. This is given by Figure 4. There are 23 airports in all of the monthly lists, and this also support our conclusion from yearly list: all 12 lists contains EWR and 6 lists contains JFK.
@@ -185,8 +182,7 @@ top_song_table = billboard %>%
   arrange(desc(count)) %>%
   head(10)
 
-top_song_table %>%
-  knitr::kable(caption = "Table 2: Top 10 Most Popular Songs Since 1958",
+knitr::kable(top_song_table, caption = "Table 2: Top 10 Most Popular Songs Since 1958",
                col.names = c("Performer","Song","Count"))
 ```
 ## Part B
