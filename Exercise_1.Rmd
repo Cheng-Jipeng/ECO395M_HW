@@ -2,7 +2,7 @@
 title: "Exercise - 1"
 author: "Jipeng Cheng, Weidi Hou, Yu-Ting Huang"
 date: "2/8/2022"
-output: github_document
+output: md_document
 ---
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
