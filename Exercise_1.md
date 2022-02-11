@@ -327,12 +327,12 @@ Figure 9: RMSE vs. K
 Thus, the graphs show that the optimal K for predicting 350’s prices
 with KNN method should be
 
-    ## [1] 14
+    ## [1] 16
 
 and the optimal K for predicting 65 AMG’s price with KNN method should
 be
 
-    ## [1] 16
+    ## [1] 15
 
 given they yield the smallest RMSEs respectively.
 
