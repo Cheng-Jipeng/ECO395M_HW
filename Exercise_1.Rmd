@@ -2,6 +2,7 @@
 title: "Exercise - 1"
 author: "Jipeng Cheng, Weidi Hou, Yu-Ting Huang"
 date: "2/8/2022"
+output: md_document
 ---
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
@@ -32,7 +33,6 @@ library(stringr)
 library(data.table)
 library(lubridate)
 library(ggplot2)
-library(kableExtra)
 library(tidyverse)
 library(ggplot2)
 library(rsample)  
@@ -139,8 +139,7 @@ by_month_table = bad_airports_bymonth_top5 %>%
             Fifth = Dest[bad_rank ==5])
 
 by_month_table %>%
-  kbl(caption = "Table 1: Top 5 Worst Destinations across Months") %>%
-  kable_styling()
+  knitr::kable(caption = "Table 1: Top 5 Worst Destinations across Months")
 ```
 
 A more sketchy way to capture the variability is counting how many time airports occur in the monthly lists of top 5 worst. This is given by Figure 4. There are 23 airports in all of the monthly lists, and this also support our conclusion from yearly list: all 12 lists contains EWR and 6 lists contains JFK.
@@ -188,8 +187,7 @@ top_song_table = billboard %>%
 
 top_song_table %>%
   knitr::kable(caption = "Table 2: Top 10 Most Popular Songs Since 1958",
-               col.names = c("Performer","Song","Count")) %>%
-  kable_styling()
+               col.names = c("Performer","Song","Count"))
 ```
 ## Part B
 ```{r fig6, fig.align='center', fig.cap= "Figure 6: Musical Diversity Over Time", echo = FALSE}
@@ -244,8 +242,7 @@ greatest_var = olympics_top20 %>%
   head(1)
 
 greatest_var %>%
-  knitr::kable(col.names = c("Event","Height Variability")) %>%
-  kable_styling(full_width = F)
+  knitr::kable(col.names = c("Event","Height Variability"))
 ```
 It is shown that women's coxed four rowing had the greatest variability in competitor's heights across the entire history of the Olympics.
 
