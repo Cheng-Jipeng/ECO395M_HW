@@ -132,12 +132,12 @@ in competitor’s heights across the entire history of the Olympics.
 Thus, the graphs show that the optimal K for predicting 350’s prices
 with KNN method should be
 
-    ## [1] 15
+    ## [1] 12
 
 and the optimal K for predicting 65 AMG’s price with KNN method should
 be
 
-    ## [1] 9
+    ## [1] 10
 
 given they yield the smallest RMSEs respectively.
 <img src="Exercise_1_files/figure-gfm/fig10-1.png" title="Figure 10: Prediction vs. Testing Set" alt="Figure 10: Prediction vs. Testing Set" style="display: block; margin: auto;" />
