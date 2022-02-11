@@ -1,14 +1,6 @@
----
-​---
-title: "Exercise - 1"
-author: "Jipeng Cheng, Weidi Hou, Yu-Ting Huang"
-date: "2/8/2022"
-​---
----
+# Data visualization: flights at ABIA
 
-# 1) Data visualization: flights at ABIA
-
-## 1.1 Worst Destination Airports
+## Worst Destination Airports
 
 What are the bad airports to fly to if you want to depart from Austin?
 We measure how “bad” these airports are with the proportion of delayed
@@ -46,17 +38,29 @@ Figure 1: Top 10 Worst Destination of 2008
 
 </div>
 
+We can also visualize the top 10 airports on a U.S. map in Figure 2 with
+blue bar refering to the values of their “Bad Index”.
+
+<div class="figure" style="text-align: center">
+
+<img src="Exercise_1_files/figure-markdown_github/fig2-1.png" alt="Figure 2: Top 10 Worst Destination of 2008 on Map"  />
+<p class="caption">
+Figure 2: Top 10 Worst Destination of 2008 on Map
+</p>
+
+</div>
+
 If you are also interested in if there are many minor delays in these
-bad flights, Figure 2 shows the proportions of all kinds of flights’
+bad flights, Figure 3 shows the proportions of all kinds of flights’
 states. If *minor delays can annoy you very much too*, then you must
 avoid choosing **Atlanta airport** as your destination among the top 10
 worst airports.
 
 <div class="figure" style="text-align: center">
 
-<img src="Exercise_1_files/figure-markdown_github/fig2-1.png" alt="Figure 2: Distribution of Delays in Top 10 Worst Destination of 2008"  />
+<img src="Exercise_1_files/figure-markdown_github/fig3-1.png" alt="Figure 3: Distribution of Delays in Top 10 Worst Destination of 2008"  />
 <p class="caption">
-Figure 2: Distribution of Delays in Top 10 Worst Destination of 2008
+Figure 3: Distribution of Delays in Top 10 Worst Destination of 2008
 </p>
 
 </div>
@@ -338,41 +342,41 @@ IND
 
 A more sketchy way to capture the variability is counting how many time
 airports occur in the monthly lists of top 5 worst. This is given by
-Figure 3. There are 23 airports in all of the monthly lists, and this
+Figure 4. There are 23 airports in all of the monthly lists, and this
 also support our conclusion from yearly list: all 12 lists contains EWR
 and 6 lists contains JFK.
 
 <div class="figure" style="text-align: center">
 
-<img src="Exercise_1_files/figure-markdown_github/fig3-1.png" alt="Figure 3: Frequency of Appearances in Top 5 Worst Destinations across Months"  />
+<img src="Exercise_1_files/figure-markdown_github/fig4-1.png" alt="Figure 4: Frequency of Appearances in Top 5 Worst Destinations across Months"  />
 <p class="caption">
-Figure 3: Frequency of Appearances in Top 5 Worst Destinations across
+Figure 4: Frequency of Appearances in Top 5 Worst Destinations across
 Months
 </p>
 
 </div>
 
-## 1.2 Best Month to Depart from AUS
+## Best Month to Depart from AUS
 
 According to the following graph, it shows that September has the lowest
 delay rate in 2008.
 
 <div class="figure" style="text-align: center">
 
-<img src="Exercise_1_files/figure-markdown_github/unnamed-chunk-1-1.png" alt="Figure 4: Delay Rate by Month in 2008"  />
+<img src="Exercise_1_files/figure-markdown_github/fig5-1.png" alt="Figure 5: Delay Rate by Month in 2008"  />
 <p class="caption">
-Figure 4: Delay Rate by Month in 2008
+Figure 5: Delay Rate by Month in 2008
 </p>
 
 </div>
 
-# 2) Wrangling the Billboard Top 100
+# Wrangling the Billboard Top 100
 
 ## Part A
 
 <table class="table" style="margin-left: auto; margin-right: auto;">
 <caption>
-Table 2: Top 10 Most Popular Songs Since 1958
+Table 2:Top 10 Most Popular Songs Since 1958
 </caption>
 <thead>
 <tr>
@@ -505,9 +509,9 @@ Before He Cheats
 
 <div class="figure" style="text-align: center">
 
-<img src="Exercise_1_files/figure-markdown_github/fig4-1.png" alt="Figure 5: Musical Diversity Over Time"  />
+<img src="Exercise_1_files/figure-markdown_github/fig6-1.png" alt="Figure 6: Musical Diversity Over Time"  />
 <p class="caption">
-Figure 5: Musical Diversity Over Time
+Figure 6: Musical Diversity Over Time
 </p>
 
 </div>
@@ -516,14 +520,14 @@ Figure 5: Musical Diversity Over Time
 
 <div class="figure" style="text-align: center">
 
-<img src="Exercise_1_files/figure-markdown_github/fig5-1.png" alt="Figure 6: Artists Having over 30 Ten-Week-Hits Songs"  />
+<img src="Exercise_1_files/figure-markdown_github/fig7-1.png" alt="Figure 7: Artists Having over 30 Ten-Week-Hits Songs"  />
 <p class="caption">
-Figure 6: Artists Having over 30 Ten-Week-Hits Songs
+Figure 7: Artists Having over 30 Ten-Week-Hits Songs
 </p>
 
 </div>
 
-# 3) Wrangling the Olympics
+# Wrangling the Olympics
 
 ## Part A
 
@@ -565,21 +569,21 @@ in competitor’s heights across the entire history of the Olympics.
 
 <div class="figure" style="text-align: center">
 
-<img src="Exercise_1_files/figure-markdown_github/unnamed-chunk-4-1.png" alt="Figure 7: Increasing Trend of Age Similar Across Female and Male Swimmers' Age After Female Participation in Olympics"  />
+<img src="Exercise_1_files/figure-markdown_github/fig8-1.png" alt="Figure 8: Increasing Trend of Age Similar Across Female and Male Swimmers' Age After Female Participation in Olympics"  />
 <p class="caption">
-Figure 7: Increasing Trend of Age Similar Across Female and Male
+Figure 8: Increasing Trend of Age Similar Across Female and Male
 Swimmers’ Age After Female Participation in Olympics
 </p>
 
 </div>
 
-# 4) K-nearest neighbors
+# K-nearest neighbors
 
 <div class="figure" style="text-align: center">
 
-<img src="Exercise_1_files/figure-markdown_github/fig6-1.png" alt="Figure 8: RMSE vs. K"  />
+<img src="Exercise_1_files/figure-markdown_github/fig9-1.png" alt="Figure 9: RMSE vs. K"  />
 <p class="caption">
-Figure 8: RMSE vs. K
+Figure 9: RMSE vs. K
 </p>
 
 </div>
@@ -587,20 +591,20 @@ Figure 8: RMSE vs. K
 Thus, the graphs show that the optimal K for predicting 350’s prices
 with KNN method should be
 
-    ## [1] 14
+    ## [1] 16
 
 and the optimal K for predicting 65 AMG’s price with KNN method should
 be
 
-    ## [1] 7
+    ## [1] 17
 
 given they yield the smallest RMSEs respectively.
 
 <div class="figure" style="text-align: center">
 
-<img src="Exercise_1_files/figure-markdown_github/fig7-1.png" alt="Figure 9: Prediction vs. Testing Set"  />
+<img src="Exercise_1_files/figure-markdown_github/fig10-1.png" alt="Figure 10: Prediction vs. Testing Set"  />
 <p class="caption">
-Figure 9: Prediction vs. Testing Set
+Figure 10: Prediction vs. Testing Set
 </p>
 
 </div>
