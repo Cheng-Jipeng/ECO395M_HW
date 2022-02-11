@@ -48,7 +48,8 @@ library(modelr)
 library(parallel)
 library(foreach)
 library(ggpubr)
-abia = read.csv("../data/ABIA.csv")
+library(RCurl)
+abia =  read.csv("https://raw.githubusercontent.com/jgscott/ECO395M/master/data/ABIA.csv")
 # Plot column graph of Bad Index vs. Top 10 worst destination
 bad_airports_top10 = abia %>%
   filter(Origin == "AUS") %>%
@@ -155,7 +156,7 @@ ggplot(data = delay_month) +
 # Wrangling the Billboard Top 100
 ## Part A
 ```{r tab2, echo = FALSE}
-billboard = read.csv("../data/billboard.csv")
+billboard = read.csv("https://raw.githubusercontent.com/jgscott/ECO395M/master/data/billboard.csv")
 # Part A: A table of the top 10 most popular songs since 1958
 top_song_table = billboard %>%
   filter(year >= 1958) %>%
@@ -204,7 +205,7 @@ ten_week_hit_30songs %>%
 # Wrangling the Olympics
 ## Part A
 ```{r, echo = FALSE}
-olympics_top20 = read.csv("../data/olympics_top20.csv")
+olympics_top20 = read.csv("https://raw.githubusercontent.com/jgscott/ECO395M/master/data/olympics_top20.csv")
 olympics_top20 %>% 
   filter(sport == "Athletics", sex == "F") %>%
   summarize(q95_height = quantile(height, 0.95))
@@ -242,7 +243,7 @@ olympics_top20 %>%
 
 # K-nearest neighbors
 ```{r fig6, fig.align='center', fig.cap="Figure 8: RMSE vs. K", echo = FALSE, warning  = FALSE}
-sclass = read.csv("../data/sclass.csv")
+sclass = read.csv("https://raw.githubusercontent.com/jgscott/ECO395M/master/data/sclass.csv")
 K_folds = 5
 k_grid = rep(1:125)
 # For trim = 350
