@@ -1,8 +1,3 @@
-Exercise - 1
-================
-Jipeng Cheng, Weidi Hou, Yu-Ting Huang
-2/8/2022
-
 # Data visualization: flights at ABIA
 
 ## Worst Destination Airports
@@ -34,8 +29,10 @@ follows **JFK airport** in New York. Considering that EWR also serves
 The NYC Metropolitan Area, it seems that choosing **New York** as
 destination is the real cause. Busy city and busy airports!
 <img src="Exercise_1_files/figure-gfm/fig1-1.png" title="Figure 1: Top 10 Worst Destination of 2008" alt="Figure 1: Top 10 Worst Destination of 2008" style="display: block; margin: auto;" />
+
 We can also visualize the top 10 airports on a U.S. map in Figure 2 with
 blue bar refering to the values of their “Bad Index”.
+
 <img src="Exercise_1_files/figure-gfm/fig2-1.png" title="Figure 2: Top 10 Worst Destination of 2008 on Map" alt="Figure 2: Top 10 Worst Destination of 2008 on Map" style="display: block; margin: auto;" />
 If you are also interested in if there are many minor delays in these
 bad flights, Figure 3 shows the proportions of all kinds of flights’
@@ -135,12 +132,12 @@ in competitor’s heights across the entire history of the Olympics.
 Thus, the graphs show that the optimal K for predicting 350’s prices
 with KNN method should be
 
-    ## [1] 17
+    ## [1] 15
 
 and the optimal K for predicting 65 AMG’s price with KNN method should
 be
 
-    ## [1] 15
+    ## [1] 9
 
 given they yield the smallest RMSEs respectively.
 <img src="Exercise_1_files/figure-gfm/fig10-1.png" title="Figure 10: Prediction vs. Testing Set" alt="Figure 10: Prediction vs. Testing Set" style="display: block; margin: auto;" />

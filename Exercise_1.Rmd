@@ -2,7 +2,9 @@
 title: "Exercise - 1"
 author: "Jipeng Cheng, Weidi Hou, Yu-Ting Huang"
 date: "2/8/2022"
-output: github_document
+output:
+  md_document:
+    variant: gfm
 ---
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
@@ -63,7 +65,9 @@ bad_airports_top10 %>%
   geom_col() +
   labs(y = "Bad Index", x= "Destination Airports")
 ```
+
 We can also visualize the top 10 airports on a U.S. map in Figure 2 with blue bar refering to the values of their "Bad Index".
+
 ```{r fig2, fig.align='center', fig.cap= "Figure 2: Top 10 Worst Destination of 2008 on Map"}
 # Visualize bad index on map
 airports_coord_raw = read.csv("https://raw.githubusercontent.com/datasets/airport-codes/master/data/airport-codes.csv")
