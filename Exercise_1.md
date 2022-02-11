@@ -1,3 +1,8 @@
+Exercise - 1
+================
+Jipeng Cheng, Weidi Hou, Yu-Ting Huang
+2/8/2022
+
 # Data visualization: flights at ABIA
 
 ## Worst Destination Airports
@@ -132,12 +137,12 @@ in competitor’s heights across the entire history of the Olympics.
 Thus, the graphs show that the optimal K for predicting 350’s prices
 with KNN method should be
 
-    ## [1] 12
+    ## [1] 16
 
 and the optimal K for predicting 65 AMG’s price with KNN method should
 be
 
-    ## [1] 10
+    ## [1] 16
 
 given they yield the smallest RMSEs respectively.
 <img src="Exercise_1_files/figure-gfm/fig10-1.png" title="Figure 10: Prediction vs. Testing Set" alt="Figure 10: Prediction vs. Testing Set" style="display: block; margin: auto;" />
