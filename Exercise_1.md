@@ -1,6 +1,6 @@
--   title: “Exercise - 1”
--   author: “Jipeng Cheng, Weidi Hou, Yu-Ting Huang”
--   date: “2/8/2022”
+-   Title: Exercise - 1
+-   Author: Jipeng Cheng, Weidi Hou, Yu-Ting Huang
+-   Date: 2/8/2022
 
 # Data visualization: flights at ABIA
 
@@ -39,7 +39,7 @@ Figure 1: Top 10 Worst Destination of 2008
 </p>
 
 We can also visualize the top 10 airports on a U.S. map in Figure 2 with
-blue bar refering to the values of their “Bad Index”.
+blue bars refering to the values of their “Bad Index”.
 
 <img src="Exercise_1_files/figure-markdown_strict/fig2-1.png" alt="Figure 2: Top 10 Worst Destination of 2008 on Map"  />
 <p class="caption">
@@ -332,7 +332,7 @@ with KNN method should be
 and the optimal K for predicting 65 AMG’s price with KNN method should
 be
 
-    ## [1] 13
+    ## [1] 16
 
 given they yield the smallest RMSEs respectively.
 

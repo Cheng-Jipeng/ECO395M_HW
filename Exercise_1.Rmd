@@ -4,9 +4,9 @@ author: "Jipeng Cheng, Weidi Hou, Yu-Ting Huang"
 date: "2/8/2022"
 output: md_document
 ---
-- title: "Exercise - 1"
-- author: "Jipeng Cheng, Weidi Hou, Yu-Ting Huang"
-- date: "2/8/2022"
+- Title: Exercise - 1
+- Author: Jipeng Cheng, Weidi Hou, Yu-Ting Huang
+- Date: 2/8/2022
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
@@ -68,7 +68,7 @@ bad_airports_top10 %>%
   labs(y = "Bad Index", x= "Destination Airports")
 ```
 
-We can also visualize the top 10 airports on a U.S. map in Figure 2 with blue bar refering to the values of their "Bad Index".
+We can also visualize the top 10 airports on a U.S. map in Figure 2 with blue bars refering to the values of their "Bad Index".
 
 ```{r fig2, fig.align='center', fig.cap= "Figure 2: Top 10 Worst Destination of 2008 on Map"}
 # Visualize bad index on map
