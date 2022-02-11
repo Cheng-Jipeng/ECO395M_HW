@@ -1,3 +1,7 @@
+-   title: “Exercise - 1”
+-   author: “Jipeng Cheng, Weidi Hou, Yu-Ting Huang”
+-   date: “2/8/2022”
+
 # Data visualization: flights at ABIA
 
 ## Worst Destination Airports
@@ -59,7 +63,6 @@ month. Definitely there are new blood across different months like
 Boston airport in February, Ontario airport in April.
 
 <table>
-<caption>Table 1: Top 5 Worst Destinations across Months</caption>
 <thead>
 <tr class="header">
 <th style="text-align: right;">Month</th>
@@ -199,7 +202,6 @@ Figure 5: Delay Rate by Month in 2008
 ## Part A
 
 <table>
-<caption>Table 2: Top 10 Most Popular Songs Since 1958</caption>
 <thead>
 <tr class="header">
 <th style="text-align: left;">Performer</th>
@@ -330,7 +332,7 @@ with KNN method should be
 and the optimal K for predicting 65 AMG’s price with KNN method should
 be
 
-    ## [1] 14
+    ## [1] 13
 
 given they yield the smallest RMSEs respectively.
 

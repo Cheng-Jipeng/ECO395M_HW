@@ -4,6 +4,10 @@ author: "Jipeng Cheng, Weidi Hou, Yu-Ting Huang"
 date: "2/8/2022"
 output: md_document
 ---
+- title: "Exercise - 1"
+- author: "Jipeng Cheng, Weidi Hou, Yu-Ting Huang"
+- date: "2/8/2022"
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
 ```
@@ -138,8 +142,9 @@ by_month_table = bad_airports_bymonth_top5 %>%
             Fourth = Dest[bad_rank ==4],
             Fifth = Dest[bad_rank ==5])
 
-knitr::kable(by_month_table, caption = "Table 1: Top 5 Worst Destinations across Months")
+knitr::kable(by_month_table)
 ```
+Table 1: Top 5 Worst Destinations across Months
 
 A more sketchy way to capture the variability is counting how many time airports occur in the monthly lists of top 5 worst. This is given by Figure 4. There are 23 airports in all of the monthly lists, and this also support our conclusion from yearly list: all 12 lists contains EWR and 6 lists contains JFK.
 
@@ -184,9 +189,10 @@ top_song_table = billboard %>%
   arrange(desc(count)) %>%
   head(10)
 
-knitr::kable(top_song_table, caption = "Table 2: Top 10 Most Popular Songs Since 1958",
-               col.names = c("Performer","Song","Count"))
+knitr::kable(top_song_table, col.names = c("Performer","Song","Count"))
 ```
+Table 2: Top 10 Most Popular Songs Since 1958
+
 ## Part B
 ```{r fig6, fig.align='center', fig.cap= "Figure 6: Musical Diversity Over Time", echo = FALSE}
 # Part B
