@@ -40,20 +40,7 @@ library(kableExtra)
 library(ggrepel)
 abia = read.csv("/Users/jipengcheng/Library/Mobile Documents/com~apple~CloudDocs/【MA】Course/Sp_Data Mining/ECO395M/data/ABIA.csv")
 
-# Plot column graph of Bad Index vs. Top 10 worst destination
-bad_airports_top10 = abia %>%
-  filter(Origin == "AUS") %>%  
-  group_by(Dest) %>%
-  summarize(cancelled = sum(Cancelled, na.rm=TRUE),
-            major_delay = sum(ArrDelay > 30, na.rm=TRUE),
-            cancel_ratio = sum(Cancelled, na.rm=TRUE)/n(),
-            major_delay_ratio = sum(ArrDelay > 30, na.rm=TRUE)/n(),
-            entry_count = n()) %>%
-  mutate(bad_count = cancelled + major_delay,
-         bad_ratio = cancel_ratio + major_delay_ratio) %>%
-  filter(bad_count > 1) %>%
-  arrange(desc(bad_ratio)) %>%
-  head(10)
+
 
 bad_airports_top10 %>%
   ggplot(aes(fct_reorder(Dest, -bad_ratio),
