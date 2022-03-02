@@ -18,7 +18,7 @@ $$
 $$
 where # refers to the number of flights. 
 
-The *yearly top 10 worst destination airports* of 2008 together with their "Bad Index" are shown in Figure \@ref(fig:fig1). **Newark airport** is the worst airport given our rating system: the flights from Austin to Newark are most likely to be delayed by over 30 minutes or cancelled. The second follows **JFK airport** in New York. Considering that EWR also serves The NYC Metropolitan Area, it seems that choosing **New York** as destination is the real cause. Busy city and busy airports!
+
 ```{r fig1, fig.align='center', fig.cap= "Top 10 Worst Destination of 2008", message = FALSE}
 # Remember to reset working directory
 library(tidyverse)
