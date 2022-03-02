@@ -11,12 +11,6 @@ knitr::opts_chunk$set(echo = FALSE)
 
 # Data visualization: flights at ABIA
 ## Worst Destination Airports
-What are the bad airports to fly to if you want to depart from Austin? We measure how "bad" these airports are with the proportion of delayed or cancelled flights. Four levels of flights' states are defined as:
-
-- On time: no delays
-- Minor delay: arrival delay < 30 mins
-- Major delay: arrival delay > 30 min
-- Cancelled: flights being cancelled
 
 Personally, we focus on flights being cancelled or with arrival delays larger than 30 minutes, which are extremely annoying to travelers. The "Bad Index" with which we rate destination airports are formally given by
 $$
