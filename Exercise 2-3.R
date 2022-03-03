@@ -1,9 +1,7 @@
-setwd("~/OneDrive - The University of Texas at Austin/學習小札/2020 UTAustin/2022 Sp_Data Mining & Stat Learning/Homework2")
-getwd()
-
-g_c = read.csv('~/OneDrive - The University of Texas at Austin/學習小札/2020 UTAustin/2022 Sp_Data Mining & Stat Learning/Homework2/german_credit.csv')
-
+library(RCurl)
 library(tidyverse)
+
+g_c = read.csv('https://raw.githubusercontent.com/Cheng-Jipeng/ECO395M/master/data/german_credit.csv')
 summary(g_c)
 
 count(g_c$Default==1)

@@ -1,7 +1,5 @@
-setwd("~/OneDrive - The University of Texas at Austin/學習小札/2020 UTAustin/2022 Sp_Data Mining & Stat Learning/Homework2")
-getwd()
-
-capmetro_UT = read.csv('~/OneDrive - The University of Texas at Austin/學習小札/2020 UTAustin/2022 Sp_Data Mining & Stat Learning/Homework2/capmetro_UT.csv')
+library(RCurl)
+capmetro_UT = read.csv('https://raw.githubusercontent.com/Cheng-Jipeng/ECO395M/master/data/capmetro_UT.csv')
 head(capmetro_UT)
 
 capmetro_UT = mutate(capmetro_UT,
