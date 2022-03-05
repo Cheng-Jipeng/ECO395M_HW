@@ -115,6 +115,10 @@ ggplot(ROC_df) +
   geom_line(aes(x=t, y=TPR, color = "TPR"), size=1) +
   geom_line(aes(x=t, y=FPR, color = "FPR"), size=1) +
   labs(y="TPR/FPR", x = "t", color=" ")
+
+ggplot(ROC_df) +
+  geom_line(aes(x=FPR, y=TPR), size=1) +
+  labs(y="TPR", x = "FPR", color=" ")
 #####
 # 3. Model Validation: Step 2
 #####
