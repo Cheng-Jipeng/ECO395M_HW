@@ -17,4 +17,6 @@ g_c_glm = glm(formula = Default ~ duration + amount + installment + age +
       history + purpose + foreign, family = "binomial", data = g_c)
 summary(g_c_glm)
 
-# What do you notice about the history variable vis-a-vis predicting defaults? What do you think is going on here? In light of what you see here, do you think this data set is appropriate for building a predictive model of defaults, if the purpose of the model is to screen prospective borrowers to classify them into "high" versus "low" probability of default? Why or why not---and if not, would you recommend any changes to the bank's sampling scheme?
+# What do you notice about the history variable vis-a-vis predicting defaults? 
+
+# What do you think is going on here? In light of what you see here, do you think this data set is appropriate for building a predictive model of defaults, if the purpose of the model is to screen prospective borrowers to classify them into "high" versus "low" probability of default? Why or why not---and if not, would you recommend any changes to the bank's sampling scheme?
