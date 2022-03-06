@@ -1,4 +1,5 @@
 library(RCurl)
+library(tidyverse)
 capmetro_UT = read.csv('https://raw.githubusercontent.com/Cheng-Jipeng/ECO395M/master/data/capmetro_UT.csv')
 head(capmetro_UT)
 
