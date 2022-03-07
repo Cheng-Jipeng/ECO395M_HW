@@ -1,342 +1,377 @@
 ---
-title: "Exercise - 1"
-author: "Jipeng Cheng"
-date: "2/8/2022"
-output: bookdown::html_document2
+title: "Exercise 2"
+author: "Yuting Huang, Jipeng Cheng, Weidi Hou"
+date: "3/5/2022"
+output:
+  word_document: default
+  pdf_document: default
+  html_document: default
 ---
 
-```{r setup, include=FALSE, cache=TRUE}
-knitr::opts_chunk$set(echo = FALSE)
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo=TRUE)
 ```
 
-# Data visualization: flights at ABIA
-## Worst Destination Airports
+# Problem 1: visualization
+## 1.1 Plot 1: average boarding line graph
 
-Personally, we focus on flights being cancelled or with arrival delays larger than 30 minutes, which are extremely annoying to travelers. The "Bad Index" with which we rate destination airports are formally given by
-$$
-\text{Bad Index}_{\text{Destination}} = \frac{\text{# of major delay + # of cancelled}}{\text{# from AUS to Destination}},
-$$
-where # refers to the number of flights. 
-
-
-```{r fig1, fig.align='center', fig.cap= "Top 10 Worst Destination of 2008", message = FALSE}
-# Remember to reset working directory
-library(tidyverse)
+```{r warning=FALSE, echo=FALSE, message=FALSE}
+library(RCurl)
 library(mosaic)
-library(dplyr)
-library(stringr)
-library(data.table)
-library(lubridate)
 library(ggplot2)
+capmetro_UT = read.csv('https://raw.githubusercontent.com/Cheng-Jipeng/ECO395M/master/data/capmetro_UT.csv')
+
+capmetro_UT = mutate(capmetro_UT,
+                     day_of_week = factor(day_of_week,
+                     levels=c("Mon", "Tue", "Wed","Thu", "Fri", "Sat", "Sun")),
+                     month = factor(month, levels=c("Sep", "Oct","Nov")))
+
+avg_boarding = capmetro_UT %>%
+  group_by(hour_of_day, day_of_week, month) %>%
+  summarize(meanboarding = mean(boarding)) 
+
+week = mutate(capmetro_UT, weekdays = day_of_week == "Mon", "Tue", "Wed","Thu", "Fri", weekend = day_of_week == "Sat", "Sun")
+
+ggplot(avg_boarding) +
+  geom_line(aes(x = hour_of_day, y=meanboarding, color=month)) +
+  facet_wrap(~day_of_week) +
+  labs(title="Average boardings grouped by hour of the day, day of week, and month", y="mean boarding", x="hour of day")
+```
+
+According to the graph, it shows that the hour of peak boardings do not change from day to day, and it broadly similar showing the peak hour at 15-17.
+
+**Does the hour of peak boarding change from day to day, or is it broadly similar across days?**
+
+According to the graph, it shows that the hour of peak boardings do not change from day to day, and it broadly similar showing the peak hour at 15-17.
+
+**Why do you think average boarding on Mondays in September look lower, compared to other days and months?** 
+
+We can guess that there are less average boardings on September because the beginning of Fall semester. On the other hand, students may not prefer choosing the courses on Monday due to "Monday Blue".
+
+**Similarly, why do you think average boardings on Weds/Thurs/Fri in November look lower?**
+
+Average boarding on Weds/Thurs/Fri in November look lower because students may have to prepare for the midterm exam, they would like to stay home rather than go outside.
+
+## 1.2 Plot 2: scatter plots showing boardings vs. temperature
+
+```{r message=FALSE, echo=FALSE, warning=FALSE}
+
+avg_boarding_tem = capmetro_UT %>%
+  group_by(temperature, hour_of_day,  weekend) %>%
+  summarize(meanboarding = mean(boarding)) 
+
+ggplot(avg_boarding_tem) +
+  geom_point(aes(x = temperature, y=meanboarding, color=weekend)) +
+  facet_wrap(~hour_of_day) +
+  labs(title="Average boardings grouped by temperature and week", y="mean boarding", x="temperature")
+```
+
+**When we hold hour of day and weekend status constant, does temperature seem to have a noticeable effect on the number of UT students riding the bus?**
+
+According to above graph, temperature seem to have no noticeable effect on the number of UT students riding the bus.
+
+# Problem 2: Saratoga house prices
+
+## 2.1 The best linear model
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
 library(tidyverse)
 library(ggplot2)
-library(rsample)  
-library(caret)
 library(modelr)
+library(rsample)
+library(mosaic)
+library(caret)
 library(parallel)
 library(foreach)
 library(ggpubr)
+library(kknn)
 library(kableExtra)
-library(ggrepel)
-abia = read.csv("/Users/jipengcheng/Library/Mobile Documents/com~apple~CloudDocs/【MA】Course/Sp_Data Mining/ECO395M/data/ABIA.csv")
+data(SaratogaHouses)
 
-
-
-bad_airports_top10 %>%
-  ggplot(aes(fct_reorder(Dest, -bad_ratio),
-             bad_ratio))+
-  geom_col() +
-  labs(y = "Bad Index", x= "Destination Airports")
-```
-
-We can also visualize the top 10 airports on a U.S. map in Figure \@ref(fig:fig2) with blue bar refering to the values of their "Bad Index".
-```{r fig2, fig.align='center', fig.cap= "Top 10 Worst Destination of 2008 on Map"}
-# Visualize bad index on map
-airports_coord_raw = read.csv("https://raw.githubusercontent.com/datasets/airport-codes/master/data/airport-codes.csv")
-## Generate top 10 dest names
-airports_name = abia %>%
-  select(Dest) %>%
-  unique() %>%
-  filter(Dest != "AUS")
-## Get their coordinates from raw data
-airports_coord = airports_coord_raw %>%
-  filter(iata_code %in% airports_name$Dest) %>%
-  select(iata_code, coordinates) %>%
-  separate(coordinates, into=c("lon", "lat"), sep=",") # Best way to split string data
-## Recreate top 10 table by adding coordinates
-bad_airports_top10 = merge(bad_airports_top10, airports_coord, by.x = "Dest", by.y = "iata_code") %>%
-  arrange(desc(bad_ratio))
-bad_airports_top10$lon = as.numeric(bad_airports_top10$lon)
-bad_airports_top10$lat = as.numeric(bad_airports_top10$lat)
-## Plot map
-usamap <- borders("usa", colour="#efede1", fill="#efede1") 
-options(ggrepel.max.overlaps = Inf)
-ggplot(bad_airports_top10) + usamap +
-  geom_point(aes(x = lat, y = lon), col = "#970027") +
-  geom_text_repel(aes(x = lat, y = lon, label = Dest)) + 
-  geom_errorbar(aes(x = lat, ymin=lon, ymax=lon+exp(10 * bad_ratio) - 1), color = "blue") +
-  theme_void()
-```
-
-If you are also interested in if there are many minor delays in these bad flights, Figure \@ref(fig:fig3) shows the proportions of all kinds of flights' states. If *minor delays can annoy you very much too*, then you must avoid choosing **Atlanta airport** as your destination among the top 10 worst airports.
-
-```{r fig3, fig.align='center', fig.cap= "Distribution of Delays in Top 10 Worst Destination of 2008"}
-# Plot percent stacked barchart (Assign multiple values to 1 variable with ifelse)
-bad_airports_plot = abia %>%
-  filter(Dest %in% bad_airports_top10$Dest) %>%
-  mutate(bad = ifelse(Cancelled == 1, "Cancelled", 
-                      ifelse( ArrDelay <= 30 & ArrDelay>0, "Minor Delay",
-                              ifelse(ArrDelay >30, "Major Delay", "On Time")))) %>%
-  group_by(Dest) %>%
-  mutate(order_count = sum(Cancelled == 1 | ArrDelay > 30, na.rm=TRUE)/n()) %>%
-  arrange(desc(order_count))
-
-bad_airports_plot %>%
-  drop_na(bad) %>%
-ggplot(aes(reorder(Dest, -order_count), 1, fill = factor(bad, levels=c( 
-  "On Time","Minor Delay", "Major Delay","Cancelled")))) + 
-  geom_bar(position="fill", stat="identity") +
-  labs(y = "Proportions of Each Kind of Delays", x= "Destination Airports", fill =" ")
-```
-
-Does the top list change over the months in 2008? Table \@ref(tab:tab1) answers the question in details by focusing on the top 5 worst airports in each month. Definitely there are new blood across different months like Boston airport in February, Ontario airport in April.  
-
-```{r tab1}
-bad_airports_bymonth = abia %>%
-  filter(Origin == "AUS") %>%
-  group_by(Dest, Month) %>%
-  summarize(bad_ratio = sum(Cancelled == 1 | ArrDelay > 30, na.rm=TRUE)/n(),
-            bad_count = sum(Cancelled == 1 | ArrDelay > 30, na.rm=TRUE),
-            .groups = 'drop') %>%
-  filter(bad_count > 1) 
-
-bad_airports_bymonth_top5 = bad_airports_bymonth %>%
-  group_by(Month) %>%
-  mutate(bad_rank = rank(-bad_ratio, ties.method = "first")) %>%
-  slice_max(order_by = bad_ratio, n=5) %>%
-  filter(bad_rank < 6)
-
-by_month_table = bad_airports_bymonth_top5 %>%
-  summarize(First = Dest[bad_rank ==1],
-            Second = Dest[bad_rank ==2],
-            Third = Dest[bad_rank ==3],
-            Fourth = Dest[bad_rank ==4],
-            Fifth = Dest[bad_rank ==5])
-
-by_month_table %>%
-  kbl(caption = "Top 5 Worst Destinations across Months") %>%
-  kable_styling()
-```
-
-A more sketchy way to capture the variability is counting how many time airports occur in the monthly lists of top 5 worst. This is given by Figure \@ref(fig:fig4). There are 23 airports in all of the monthly lists, and this also support our conclusion from yearly list: all 12 lists contains EWR and 6 lists contains JFK.
-
-```{r fig4, fig.align='center', fig.cap= "Frequency of Appearances in Top 5 Worst Destinations across Months"}
-bad_airports_bymonth_top5 %>%
-  group_by(Dest) %>%
-  mutate(Dest_count = n()) %>%
-  ggplot(aes(x=reorder(Dest, Dest_count)))+
-  geom_bar() +
-  labs(y = "Counts of Appearances", x="Destination Airports") + 
-  coord_flip() 
-  
-```
-
-## Best Month to Depart from AUS
-According to the following graph, it shows that September has the lowest delay rate in 2008.
-```{r fig5, fig.align='center', fig.cap="Delay Rate by Month in 2008"}
-abia_modified = abia %>%
-  mutate(if_delay = ifelse(DepDelay > 0, 1, 0))
-
-delay_month = abia_modified %>%
-  filter(Origin == 'AUS', Cancelled == 0) %>%
-  group_by(Month)%>%
-  summarise(total_count = n(), delay_num =sum(if_delay), delay_rate = delay_num/total_count)
-
-ggplot(data = delay_month) + 
-  geom_line(mapping = aes(x=Month, y=delay_rate),color = "red") +
-  scale_x_continuous(breaks = 1:12) +
-  labs(y="Delay Rate", x = "Month")
-```
-
-
-# Wrangling the Billboard Top 100
-## Part A
-```{r tab2}
-billboard = read.csv("/Users/jipengcheng/Library/Mobile Documents/com~apple~CloudDocs/【MA】Course/Sp_Data Mining/ECO395M/data/billboard.csv")
-# Part A: A table of the top 10 most popular songs since 1958
-top_song_table = billboard %>%
-  filter(year >= 1958) %>%
-  group_by(performer, song) %>%
-  summarize(count = n(), .groups = 'drop') %>%
-  arrange(desc(count)) %>%
-  head(10)
-
-top_song_table %>%
-  knitr::kable(caption = "Top 10 Most Popular Songs Since 1958",
-               col.names = c("Performer","Song","Count")) %>%
-  kable_styling()
-```
-## Part B
-```{r fig6, fig.align='center', fig.cap= "Musical Diversity Over Time"}
-# Part B
-billboard %>%
-  filter(year != 1958 & year != 2021) %>%
-  group_by(year) %>%
-  summarise(musical_diversity = length(unique(song))) %>%
-  ggplot(aes(x = year, y = musical_diversity))+
-  geom_line()+
-  geom_point()+
-  labs(x = "Year", y = "# of Unique Songs Appearing in the Billboard Top 100 over Years")
-```
-## Part C
-```{r fig7, fig.align='center', fig.cap="Artists Having over 30 Ten-Week-Hits Songs"}
-# Part C
-ten_week_hit = billboard %>%
-  group_by(performer, song) %>%
-  summarize(count = n(), .groups='drop') %>%
-  filter(count >= 10)
-
-ten_week_hit_30songs = ten_week_hit%>%
-  group_by(performer) %>%
-  summarize(week_hit_count = n()) %>%
-  filter(week_hit_count >= 30)
-
-ten_week_hit_30songs %>%
-  ggplot(aes(x=fct_reorder(performer, week_hit_count), y=week_hit_count)) +
-  geom_col() +
-  coord_flip()+
-  labs(x="Weeks of Hits", y="Artists")
-```
-
-# Wrangling the Olympics
-## Part A
-```{r}
-olympics_top20 = read.csv("/Users/jipengcheng/Library/Mobile Documents/com~apple~CloudDocs/【MA】Course/Sp_Data Mining/ECO395M/data/olympics_top20.csv")
-olympics_top20 %>% 
-  filter(sport == "Athletics", sex == "F") %>%
-  summarize(q95_height = quantile(height, 0.95))
-```
-The 95th percentile of heights for female competitors across all Athletics events is **183cm**.
-
-## Part B
-```{r}
-# Part B
-greatest_var = olympics_top20 %>%
-  filter(sex == "F") %>%
-  group_by(event) %>%
-  summarize(height_variability = sd(height)) %>%
-  arrange(desc(height_variability)) %>%
-  head(1)
-
-greatest_var %>%
-  knitr::kable(col.names = c("Event","Height Variability")) %>%
-  kable_styling(full_width = F)
-```
-It is shown that women's coxed four rowing had the greatest variability in competitor's heights across the entire history of the Olympics
-
-## Part C
-```{r, fig.align='center', fig.cap="Increasing Trend of Age Similar Across Female and Male Swimmers' Age After Female Participation in Olympics"}
-# Part C
-olympics_top20 %>%
-  filter(sport == "Swimming") %>%
-  group_by(sex, year) %>%
-  summarize(avg_age = mean(age), .groups='drop') %>%
-  ggplot(aes(x = year ,y = avg_age, color = sex)) +
-  geom_line() +
-  geom_point() +
-  labs(x="Year", y="Average Age")
-```
-
-# K-nearest neighbors
-```{r fig8, fig.align='center', fig.cap="RMSE vs. K", warning = FALSE}
-sclass = read.csv("/Users/jipengcheng/Library/Mobile Documents/com~apple~CloudDocs/【MA】Course/Sp_Data Mining/ECO395M/data/sclass.csv")
+# Split into training and testing sets with K folds
 K_folds = 5
+sh_folds = crossv_kfold(SaratogaHouses, k = K_folds)
+# Question 1
+lm1 = map(sh_folds$train, ~ lm(price ~ lotSize + bedrooms + bathrooms, data=. ))
+lm2 = map(sh_folds$train, ~ lm(price ~ . - pctCollege - sewer - waterfront - landValue - newConstruction,
+                               data=. ))
+lm3 = map(sh_folds$train, ~ lm(price ~ (. - pctCollege - sewer - waterfront - landValue - newConstruction)^2,
+                               data=. ))
+lm4 = map(sh_folds$train, ~ lm(price ~ livingArea + centralAir + bathrooms + fuel + 
+                                 lotSize + bedrooms + rooms + livingArea:centralAir + livingArea:bathrooms + 
+                                 livingArea:fuel + livingArea:rooms + bathrooms:bedrooms + centralAir:fuel + 
+                                 bathrooms:fuel + fuel:lotSize + centralAir:bathrooms +  bedrooms:rooms, data=. ))
+
+errs_lm1 = map2_dbl(lm1, sh_folds$test, modelr::rmse)
+errs_lm2 = map2_dbl(lm2, sh_folds$test, modelr::rmse)
+errs_lm3 = map2_dbl(lm3, sh_folds$test, modelr::rmse)
+errs_lm4 = map2_dbl(lm4, sh_folds$test, modelr::rmse)
+# Predictions out of sample
+# Root Mean squared error
+c(errs_lm1 = mean(errs_lm1), errs_lm2= mean(errs_lm2), errs_lm3 = mean(errs_lm3), errs_lm4 =  mean(errs_lm4))
+```
+
+**Build the best linear model for price that you can. It should clearly outperform the "medium" model that we considered in class. Use any combination of transformations, engineering features, polynomial terms, and interactions that you want; and use any strategy for selecting the model that you want.**
+
+The result suggests that lm4 is the best, since it has the lowest cross validation rmse. The formular of linear model 4 is as below. The cross-validation rmse of lm4 is smaller than that of medium model. Therefore, our model overperfom the medium model.
+
+$price=livingarea+centralair+bathrooms+fuel+lotsize+bedrooms+rooms+livingarea\times centralair+livingarea \times bathrooms+livingarea \times fuel+livingarea \times rooms+bathrooms \times bedrooms+centralair \times fuel+bathroom \times fuel+fuel \times lotsize+centralair \times bathrooms+bedrooms \times rooms  $
+
+
+## 2.2 The Best KNN
+
+We will find optimal k and features simultaneously.
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+
+## Features from lm1
+
 k_grid = rep(1:125)
-# For trim = 350
-sclass_350 = sclass %>% filter(trim == "350")
-sclass_350_folds = crossv_kfold(sclass_350, k=K_folds)
-cv_grid_350 = foreach(k = k_grid, .combine='rbind') %dopar% {
-  models = map(sclass_350_folds$train, ~ knnreg(price ~ mileage, k=k, data = ., use.all=FALSE))
-  errs = map2_dbl(models, sclass_350_folds$test, modelr::rmse)
+cv_sh_knn1 = foreach(k = k_grid, .combine='rbind') %dopar% {
+  models = map(sh_folds$train, ~ knnreg(price ~ lotSize + bedrooms + bathrooms,
+                                        data = ., k=k, use.all=FALSE))
+  errs = map2_dbl(models, sh_folds$test, modelr::rmse)
   c(k=k, err = mean(errs), std_err = sd(errs)/sqrt(K_folds))
 } %>% as.data.frame
 
-k_min_rmse_350 = cv_grid_350 %>%
+k_min_rmse_sh1 = cv_sh_knn1 %>%
   slice_min(err) %>%
   pull(k)
-  
-k_plot_350 = ggplot(cv_grid_350) +
-  ggtitle("RMSE of Prediction for 350's vs. K") +
-  geom_point(aes(x = k, y = err)) +
-  geom_errorbar(aes(x = k, ymin = err-std_err, ymax = err+std_err)) + 
-  geom_vline(aes(xintercept = k_min_rmse_350)) +
-  labs(x="K", y="RMSE for 350's ")
-## predictions vs. x
-sclass_350_split = initial_split(sclass_350, prop = 0.8)
-sclass_350_train = training(sclass_350_split)
-sclass_350_test = testing(sclass_350_split)
-knn_optimal_350 = knnreg(price ~ mileage, data = sclass_350_train, k = k_min_rmse_350)
-pred_vs_x_350= sclass_350_test %>%
-  mutate(price_predict = predict(knn_optimal_350, sclass_350_test)) %>%
-  ggplot()+
-  ggtitle("Prediction for 350's with Optimal K") +
-  geom_point(aes(x=mileage, y=price))+
-  geom_line(aes(x=mileage, y=price_predict))
-
-
-# For trim = 65
-sclass_65= sclass %>% filter(trim == "65 AMG")
-sclass_65_folds = crossv_kfold(sclass_65, k=K_folds)
-cv_grid_65 = foreach(k = k_grid, .combine='rbind') %dopar% {
-  models = map(sclass_65_folds$train, ~ knnreg(price ~ mileage, k=k, data = ., use.all=FALSE))
-  errs = map2_dbl(models, sclass_65_folds$test, modelr::rmse)
+cv_sh_knn1_err = cv_sh_knn1 %>% filter(k==k_min_rmse_sh1)
+## Features from lm2 & lm3
+cv_sh_knn2 = foreach(k = k_grid, .combine='rbind') %dopar% {
+  models = map(sh_folds$train, ~ knnreg(price ~ (. - pctCollege - sewer - waterfront - landValue - newConstruction)
+                                        , data = ., k=k, use.all=FALSE))
+  errs = map2_dbl(models, sh_folds$test, modelr::rmse)
   c(k=k, err = mean(errs), std_err = sd(errs)/sqrt(K_folds))
 } %>% as.data.frame
 
-k_min_rmse_65 = cv_grid_65 %>%
+k_min_rmse_sh2 = cv_sh_knn2 %>%
   slice_min(err) %>%
   pull(k)
+cv_sh_knn2_err = cv_sh_knn2 %>% filter(k==k_min_rmse_sh2)
+## Features from lm4
+cv_sh_knn3 = foreach(k = k_grid, .combine='rbind') %dopar% {
+  models = map(sh_folds$train, ~ knnreg(price ~ livingArea + centralAir + bathrooms + bedrooms + 
+                                          lotSize + fuel + rooms
+                                        , data = ., k=k, use.all=FALSE))
+  errs = map2_dbl(models, sh_folds$test, modelr::rmse)
+  c(k=k, err = mean(errs), std_err = sd(errs)/sqrt(K_folds))
+} %>% as.data.frame
 
-k_plot_65 = ggplot(cv_grid_65) +
-  ggtitle("RMSE of Prediction for 65 AMG's vs. K") +
-  geom_point(aes(x = k, y = err)) +
-  geom_errorbar(aes(x = k, ymin = err-std_err, ymax = err+std_err)) +
-  geom_vline(aes(xintercept = k_min_rmse_65)) +
-  labs(x="K", y="RMSE")
-## predictions vs. x
-sclass_65_split = initial_split(sclass_65, prop = 0.8)
-sclass_65_train = training(sclass_65_split)
-sclass_65_test = testing(sclass_65_split)
-knn_optimal_65 = knnreg(price ~ mileage, data = sclass_65_train, k = k_min_rmse_65)
-pred_vs_x_65 = sclass_65_test %>%
-  mutate(price_predict = predict(knn_optimal_65, sclass_65_test)) %>%
-  ggplot()+
-  ggtitle("Prediction for 65 AMG's with Optimal K") +
-  geom_point(aes(x=mileage, y=price))+
-  geom_line(aes(x=mileage, y=price_predict))
+k_min_rmse_sh3= cv_sh_knn3 %>%
+  slice_min(err) %>%
+  pull(k)
+cv_sh_knn3_err = cv_sh_knn3 %>% filter(k==k_min_rmse_sh3)
+## Cross-validation OOS Performance Errors for KNN
+rbind(knn1 = cv_sh_knn1_err,knn2 = cv_sh_knn2_err, knn3 = cv_sh_knn3_err)
+## To .Rmd writer: You may write some codes to incorporate these 2 results since we are required to compared KNN results
+## with linear regression results.
 
-# Combine multiple plots
-ggarrange(k_plot_350, k_plot_65, 
-          ncol = 1, nrow = 2)
+# XDD
+
 ```
-Thus, the graphs show that the optimal K for predicting 350's prices with KNN method should be
-```{r}
-k_min_rmse_350
+
+**Which model seems to do better at achieving lower out-of-sample mean-squared error?**
+
+Analysis: According to our results, the cross-validation error is lower for linear model, so linear model seems to do better at achieving lower out of sample mean squared error. However, the best variables and cross-validation error for knn and linear model is pretty similar, the difference is $68217.62-64837.09=3380.53$, which is very small compared to their value.
+
+# problem 3: Classification and retrospective sampling
+## 3.1 bar plot of default probability by credit history
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+library(RCurl)
+library(tidyverse)
+
+g_c = read.csv('https://raw.githubusercontent.com/Cheng-Jipeng/ECO395M/master/data/german_credit.csv')
+
+##g_c %>%
+  ##group_by(history) %>%
+  ##count(Default==1)
+
+ggplot(aes(x=Default/300, y=history), data=g_c) +
+  geom_col() +
+  labs(title="default probability by credit history", y="history performance", x="Default probability")
 ```
-and the optimal K for predicting 65 AMG's price with KNN method should be
-```{r}
-k_min_rmse_65
+
+## 3.2 logistic regression model
+```{r message=FALSE, warning=FALSE, echo=TRUE}
+g_c_glm = glm(formula = Default ~ duration + amount + installment + age + 
+      history + purpose + foreign, family = "binomial", data = g_c)
 ```
-given they yield the smallest RMSEs respectively.
-```{r fig9, fig.align='center', fig.cap="Prediction vs. Testing Set"}
-ggarrange(pred_vs_x_350, pred_vs_x_65, 
-          ncol = 1, nrow = 2) 
+**What do you notice about the history variable vis-a-vis predicting defaults? What do you think is going on here? In light of what you see here, do you think this data set is appropriate for building a predictive model of defaults, if the purpose of the model is to screen prospective borrowers to classify them into "high" versus "low" probability of default? Why or why not---and if not, would you recommend any changes to the bank's sampling scheme?**
+
+Based on the data, the default probability of people with good history is higher than the default probability of people with poor history. There is a sampling problem in this model, since this model based on the "case-control" design. To be specific, if we want to choose three features as factors in the model, but only two of them have been chosen in to the model but one feature has been omitted, it will lead to more incorrect analysis for those two features. It's a type of problem of selection bias and misrepresentation. Based on our previous analysis, this data set is inappropriate for building a predictive model of defaults. We recommend the bank change their sampling scheme in order to solve the unbalanced sample problem, such as using random sampling method. 
+
+# problem 4: Children and hotel reservations
+## 4.1 build model
+Count the dependent variable:
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+library(RCurl)
+library(tidyverse)
+library(mosaic)
+library(ggplot2)
+library(gamlr)
+library(rsample)
+library(modelr)
+library(parallel)
+library(foreach)
+
+# Read in data
+hotel_dev = read.csv("https://raw.githubusercontent.com/Cheng-Jipeng/ECO395M/master/data/hotels_dev.csv")
+hotel_val = read.csv("https://raw.githubusercontent.com/Cheng-Jipeng/ECO395M/master/data/hotels_val.csv")
+hotel_dev = hotel_dev %>% filter(reserved_room_type != "L") 
+#// Because of no corresponding data points in hotel_val.csv, see DEBUG at the end for more details.
+# Data browsing
+ggplot(data = hotel_dev) +
+  geom_histogram(aes(x=children), binwidth=0.5)
+hotel_dev_split = initial_split(hotel_dev, prop = 0.8)
+hotel_dev_train = training(hotel_dev_split)
+hotel_dev_test = testing(hotel_dev_split)
 ```
-The trim of 350 tends to yield a larger optimal value of K. This might be because the sample size of 350's is larger and allows a bigger K to capture more information, reduce estimation bias, and avoid being heavily affected by noises.
 
+### 4.1.1 Build baseline model
+```{r warning=FALSE, message=FALSE}
+baseline1 = glm(children ~ market_segment + adults + customer_type + is_repeated_guest,
+                data = hotel_dev_train, family = "binomial")
+baseline2 = glm(children ~ . - arrival_date , data = hotel_dev_train, family = "binomial")
+```
 
+### 4.2 Build best model - Feature engineering with LASSO 
+idea: use LASSO to find main effects + interaction by eyeballing
+```{r warning=FALSE, message=FALSE}
+hotel_lasso_x_main = model.matrix(children ~  (.-1-arrival_date), data=hotel_dev_train)
+hotel_lasso_x_itac = model.matrix(children ~  (.-1-arrival_date)^2, data=hotel_dev_train)
+hotel_lasso_y = hotel_dev_train$children
+#//see https://cran.r-project.org/web/packages/gamlr/gamlr.pdf to see more
+hotel_lasso_main = cv.gamlr(hotel_lasso_x_main, hotel_lasso_y, nfold=10, verb=TRUE, family="binomial")
+hotel_lasso_itac = cv.gamlr(hotel_lasso_x_itac, hotel_lasso_y, nfold=10, verb=TRUE, family="binomial")
+```
 
+**Extract strong single covariates:**
+```{r warning=FALSE, message=FALSE, echo=FALSE}
+coef(hotel_lasso_main, select='min')
+```
+From the output, we see that the variable **deposit_type** is insignificant from zero. Therefore, we rule out it.
 
+**Extract strong interactions:**
+```{r warning=FALSE, message=FALSE, echo=FALSE}
+strong_interaction_name = coef(hotel_lasso_itac, select = 'min')@Dimnames[1] %>% as.data.frame() 
+strong_interaction_name = strong_interaction_name[coef(hotel_lasso_itac, select = 'min')@i,] 
+strong_interaction_beta = coef(hotel_lasso_itac, select = 'min')@x[-1]
+coef_lasso = cbind(strong_interaction_name, strong_interaction_beta) %>% # transform matrix to dataframe
+  as.data.frame() %>%
+  mutate(abs_beta = abs(as.numeric(strong_interaction_beta))) 
+coef_lasso %>% # filter in strong interaction
+  filter(!(strong_interaction_name %in% colnames(hotel_dev))) %>%
+  arrange(desc(abs_beta)) %>%
+  head(30) 
+#// pick (meal:reserved_room_type, reserved_room_type:assigned_room_type, hotel:reserved_room_type, market_segment:reserved_room_type,
+#// meal:is_repeated_guest, adults:previous_bookings_not_canceled, meal:previous_bookings_not_canceled, market_segment:customer_type,
+#// is_repeated_guest:assigned_room_type, assigned_room_type:required_car_parking_spaces) by eyeballing
+```
+From the results, we pick these terms: $meal \times \text{reserved_room_type}$, $\text{assigned_room_type} \times \text{reserved_room_type}$, $hotel \times \text{reserved_room_type}$, $\text{market_segment} \times \text{reserved_room_type}$,$meal \times \text{is_repeated_guest}$, $adult \times \text{previous_bookings_not_canceled}$, $meal \times \text{previous_bookings_not_canceled}$, $\text{market_segment}\times  \times \text{customer_type}$, $\text{is_repeated_guest} \times \text{assigned_room_type}$, $\text{assigned_room_type} \times \text{required_car_parking_spaces}$ by eyeballing, since they are significant from zero.
 
+**Rule out non-converged covariates & interactions:**
+```{r warning=FALSE, message=FALSE, echo=FALSE}
+lasso_selected_try = glm(children ~ (.-arrival_date-deposit_type) + meal:reserved_room_type+ reserved_room_type:assigned_room_type+
+                           hotel:reserved_room_type+ market_segment:reserved_room_type+meal:is_repeated_guest+ 
+                           adults:previous_bookings_not_canceled+ meal:previous_bookings_not_canceled+ market_segment:customer_type+
+                           is_repeated_guest:assigned_room_type+ assigned_room_type:required_car_parking_spaces, 
+                         data = hotel_dev_train, family = "binomial")
+coef(lasso_selected_try) # rule out non-converged covariates & interactions
+lasso_selected = glm(children ~ (.-arrival_date-deposit_type) + hotel:reserved_room_type+ meal:is_repeated_guest+ 
+                           adults:previous_bookings_not_canceled+ meal:previous_bookings_not_canceled+ market_segment:customer_type+
+                           is_repeated_guest:assigned_room_type+ assigned_room_type:required_car_parking_spaces, 
+                         data = hotel_dev_train, family = "binomial")
+```
+We rule out all the variables and interactions with **NA**, since they are non-converged.
 
+## 4.3 Out-of-sample performance evaluation
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+### baseline evaluation
+#### calculate deviance
+test_child_index = which(hotel_dev_test$children == 1) # find true book with children
+phat_baseline1 = predict(baseline1, hotel_dev_test, type = "response") # baseline1
+baseline1_predict_deviance = -2 * sum(log(phat_baseline1[test_child_index]))
+phat_baseline2 = predict(baseline2, hotel_dev_test, type = "response") # baseline2
+baseline2_predict_deviance = -2 * sum(log(phat_baseline2[test_child_index]))
+phat_lasso_selected = predict(lasso_selected, hotel_dev_test, type = "response") # lasso_selected
+lasso_selected_predict_deviance = -2 * sum(log(phat_lasso_selected[test_child_index]))
+#### confusion matrix + relevant evaluation
+yhat_baseline1 = ifelse(phat_baseline1>0.5, 1, 0)
+yhat_baseline2 = ifelse(phat_baseline2>0.5, 1, 0)
+yhat_lasso_selected = ifelse(phat_lasso_selected>0.5, 1, 0)
+confusion_baseline1 = table(y=hotel_dev_test$children, yhat=yhat_baseline1)
+confusion_baseline1 = cbind(confusion_baseline1, c(0,0))
+confusion_baseline2 = table(y=hotel_dev_test$children, yhat=yhat_baseline2)
+confusion_lasso_selected = table(y=hotel_dev_test$children, yhat=yhat_lasso_selected)
 
+## (4) Output: a table of measuring out-of-sample performance
+measurement = c("Deviance", "TPR", "FPR", "FDR")
+eval_baseline1 = c(baseline1_predict_deviance,
+      confusion_baseline1[2,2]/(confusion_baseline1[2,2]+confusion_baseline1[2,1]),
+      confusion_baseline1[1,2]/(confusion_baseline1[1,1]+confusion_baseline1[1,2]),
+      confusion_baseline1[1,2]/(confusion_baseline1[1,2]+confusion_baseline1[2,2])) %>% round(3)
+eval_baseline2 = c(baseline2_predict_deviance,
+      confusion_baseline2[2,2]/(confusion_baseline2[2,2]+confusion_baseline2[2,1]),
+      confusion_baseline2[1,2]/(confusion_baseline2[1,1]+confusion_baseline2[1,2]),
+      confusion_baseline2[1,2]/(confusion_baseline2[1,2]+confusion_baseline2[2,2])) %>% round(3)
+eval_lasso_selected = c(lasso_selected_predict_deviance,
+                        confusion_lasso_selected[2,2]/(confusion_lasso_selected[2,2]+confusion_lasso_selected[2,1]),
+                        confusion_lasso_selected[1,2]/(confusion_lasso_selected[1,1]+confusion_lasso_selected[1,2]),
+                        confusion_lasso_selected[1,2]/(confusion_lasso_selected[1,2]+confusion_lasso_selected[2,2])) %>% round(3)
+rbind(measurement, eval_baseline1, eval_baseline2, eval_lasso_selected)
+```
+
+## 4.4 Model Validation: Step 1
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+## (1) Preidcition with validation set
+phat_lasso_predict_best = predict(lasso_selected, hotel_val, type = "response")
+## (2) Calculate TPR & FPR vs. t
+t_grid = rep(1:49)/50
+ROC_df = foreach(t = t_grid, .combine='rbind') %dopar% {
+  yhat_best = ifelse(phat_lasso_predict_best > t, 1, 0)
+  confusion_best = table(y=hotel_val$children, yhat=yhat_best)
+  TPR_best = confusion_best[2,2]/(confusion_best[2,2]+confusion_best[2,1]) %>% round(3)
+  FPR_best = confusion_best[1,2]/(confusion_best[1,1]+confusion_best[1,2]) %>% round(3)
+  c(t=t, TPR = TPR_best, FPR = FPR_best)
+} %>% as.data.frame()
+## (3) Plot the graph
+ggplot(ROC_df) +
+  geom_line(aes(x=t, y=TPR, color = "TPR"), size=1) +
+  geom_line(aes(x=t, y=FPR, color = "FPR"), size=1) +
+  labs(y="TPR/FPR", x = "t", color=" ")
+### real ROC Curve (use this)  
+ggplot(ROC_df) +
+  geom_line(aes(x=FPR, y=TPR), size=1) +
+  labs(y="TPR", x = "FPR", color=" ")
+```
+
+## 4.5 Model Validation: Step 2
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+K_folds = 20
+
+hotel_val = hotel_val %>%
+  mutate(fold_id = rep(1:K_folds, length=nrow(hotel_val)) %>% sample)
+
+hotel_val_cv = foreach(fold = 1:K_folds, .combine='rbind') %dopar% {
+  hotel_val_folds_train = filter(hotel_val, fold_id == fold)
+  hotel_val_folds_phat = predict(lasso_selected, hotel_val_folds_train, type = "response")
+  c(y=sum(hotel_val_folds_train$children), E_y=sum(hotel_val_folds_phat)%>%round(0))
+} %>% as.data.frame()
+
+hotel_val_cv = hotel_val_cv %>%
+  arrange(y) %>%
+  mutate(fold_id = rep(1:K_folds))
+
+ggplot(data = hotel_val_cv) +
+  geom_line(aes(x=fold_id, y=y, color = "Actual # of children"),  size=1) +
+  geom_line(aes(x=fold_id, y=E_y, color = "Predicted # of children"), size=1) +
+  labs(y="Predicted / Actual Children for Each Fold", x = "t", color=" ")+
+  geom_point(aes(x=fold_id, y=y)) +
+  geom_point(aes(x=fold_id, y=E_y))
+
+```
+
+From the plot, the difference of each fold for actual data and predicted model is small, which is almost smaller than 5. Therefore, our model do well at predicting the total number of bookings with children in a group of 250 bookings.
