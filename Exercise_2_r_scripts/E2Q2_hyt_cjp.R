@@ -78,3 +78,4 @@ rbind(knn1 = cv_sh_knn1_err,knn2 = cv_sh_knn2_err, knn3 = cv_sh_knn3_err)
 ## To .Rmd writer: You may write some codes to incorporate these 2 results since we are required to compared KNN results
 ## with linear regression results.
 
+# XDD
