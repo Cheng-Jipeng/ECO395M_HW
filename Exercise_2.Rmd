@@ -375,4 +375,4 @@ ggplot(data = hotel_val_cv) +
 
 ```
 
-Figure \@ref(fig:fig6) shows that the difference of each fold for actual data and predicted model is small, which is always smaller than 5. Therefore, our model do well in predicting the total number of bookings with children in each fold.
+Figure \@ref(fig:fig6) shows that the difference of each fold for actual data and predicted model is small, which is always smaller than 5. Therefore, our model does well in predicting the total number of bookings with children in each fold.
