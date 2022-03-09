@@ -79,3 +79,10 @@ rbind(knn1 = cv_sh_knn1_err,knn2 = cv_sh_knn2_err, knn3 = cv_sh_knn3_err)
 ## with linear regression results.
 
 # XDD
+lm4_pred = lm(price ~ livingArea + centralAir + bathrooms + fuel + 
+     lotSize + bedrooms + rooms + livingArea:centralAir + livingArea:bathrooms + 
+     livingArea:fuel + livingArea:rooms + bathrooms:bedrooms + centralAir:fuel + 
+     bathrooms:fuel + fuel:lotSize + centralAir:bathrooms +  bedrooms:rooms, data= SaratogaHouses)
+coef_lm4_pred = coef(lm4_pred)[2:6] %>% as.data.frame() 
+colnames(coef_lm4_pred) = c("Predicted Value")
+coef_lm4_pred

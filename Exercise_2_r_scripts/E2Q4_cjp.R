@@ -11,7 +11,6 @@ library(foreach)
 # Read in data
 hotel_dev = read.csv("https://raw.githubusercontent.com/Cheng-Jipeng/ECO395M/master/data/hotels_dev.csv")
 hotel_val = read.csv("https://raw.githubusercontent.com/Cheng-Jipeng/ECO395M/master/data/hotels_val.csv")
-hotel_dev = hotel_dev %>% filter(reserved_room_type != "L") 
 #// Because of no corresponding data points in hotel_val.csv, see DEBUG at the end for more details.
 # Data browsing
 ggplot(data = hotel_dev) +
@@ -36,7 +35,11 @@ hotel_lasso_y = hotel_dev_train$children
 hotel_lasso_main = cv.gamlr(hotel_lasso_x_main, hotel_lasso_y, nfold=10, verb=TRUE, family="binomial")
 hotel_lasso_itac = cv.gamlr(hotel_lasso_x_itac, hotel_lasso_y, nfold=10, verb=TRUE, family="binomial")
 #### extract strong single covariates
-coef(hotel_lasso_main, select='min') #// rule out 'deposit_type' by eyeballing
+coef_hotel_lasso_main = coef(hotel_lasso_main, select='min') %>% 
+  as.matrix() %>% 
+  as.data.frame() %>%
+  filter(seg100 == 0)
+colnames(coef_hotel_lasso_main) = c("Partial effects") #// rule out 'deposit_type' by eyeballing
 #### extract strong interactions
 strong_interaction_name = coef(hotel_lasso_itac, select = 'min')@Dimnames[1] %>% as.data.frame() 
 strong_interaction_name = strong_interaction_name[coef(hotel_lasso_itac, select = 'min')@i,] 
@@ -44,10 +47,11 @@ strong_interaction_beta = coef(hotel_lasso_itac, select = 'min')@x[-1]
 coef_lasso = cbind(strong_interaction_name, strong_interaction_beta) %>% # transform matrix to dataframe
   as.data.frame() %>%
   mutate(abs_beta = abs(as.numeric(strong_interaction_beta))) 
-coef_lasso %>% # filter in strong interaction
+coef_lasso = coef_lasso %>% # filter in strong interaction
   filter(!(strong_interaction_name %in% colnames(hotel_dev))) %>%
   arrange(desc(abs_beta)) %>%
   head(30) 
+colnames(coef_lasso) = c("Strong Interaction","Partial Effects", "Absolute Values of Partial Effects")
 #// pick (meal:reserved_room_type, reserved_room_type:assigned_room_type, hotel:reserved_room_type, market_segment:reserved_room_type,
 #// meal:is_repeated_guest, adults:previous_bookings_not_canceled, meal:previous_bookings_not_canceled, market_segment:customer_type,
 #// is_repeated_guest:assigned_room_type, assigned_room_type:required_car_parking_spaces) by eyeballing
@@ -56,7 +60,12 @@ lasso_selected_try = glm(children ~ (.-arrival_date-deposit_type) + meal:reserve
                            adults:previous_bookings_not_canceled+ meal:previous_bookings_not_canceled+ market_segment:customer_type+
                            is_repeated_guest:assigned_room_type+ assigned_room_type:required_car_parking_spaces, 
                          data = hotel_dev_train, family = "binomial")
-coef(lasso_selected_try) # rule out non-converged covariates & interactions
+coef_lasso_selected_try = coef(lasso_selected_try, select='min') %>% 
+  as.matrix() %>% 
+  as.data.frame() %>%
+  filter(is.na(V1))
+colnames(coef_lasso_selected_try) = c("Partial effects") 
+coef_lasso_selected_try # rule out non-converged covariates & interactions
 lasso_selected = glm(children ~ (.-arrival_date-deposit_type) + hotel:reserved_room_type+ meal:is_repeated_guest+ 
                            adults:previous_bookings_not_canceled+ meal:previous_bookings_not_canceled+ market_segment:customer_type+
                            is_repeated_guest:assigned_room_type+ assigned_room_type:required_car_parking_spaces, 
@@ -94,7 +103,13 @@ eval_lasso_selected = c(lasso_selected_predict_deviance,
                         confusion_lasso_selected[2,2]/(confusion_lasso_selected[2,2]+confusion_lasso_selected[2,1]),
                         confusion_lasso_selected[1,2]/(confusion_lasso_selected[1,1]+confusion_lasso_selected[1,2]),
                         confusion_lasso_selected[1,2]/(confusion_lasso_selected[1,2]+confusion_lasso_selected[2,2])) %>% round(3)
-rbind(measurement, eval_baseline1, eval_baseline2, eval_lasso_selected)
+header.true <- function(df) {
+  names(df) <- as.character(unlist(df[1,]))
+  df[-1,]
+}
+rbind(measurement, eval_baseline1, eval_baseline2, eval_lasso_selected) %>% as.data.frame() %>%
+  header.true() %>%
+  rownames() = c("Baseline 1", "Baseline 2", "Best")
 
 #####
 # 2. Model Validation: Step 1
