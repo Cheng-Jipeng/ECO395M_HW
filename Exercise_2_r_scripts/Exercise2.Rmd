@@ -3,7 +3,10 @@ title: "Exercise 2"
 author: "Yuting Huang, Jipeng Cheng, Weidi Hou"
 date: "3/5/2022"
 output:
+<<<<<<< Updated upstream
   word_document: default
+=======
+>>>>>>> Stashed changes
   pdf_document: default
   html_document: default
 ---
