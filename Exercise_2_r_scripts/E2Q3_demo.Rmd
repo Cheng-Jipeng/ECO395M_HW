@@ -1,0 +1,39 @@
+---
+title: "Exercise 2"
+author: "Yuting Huang, Jipeng Cheng, Weidi Hou"
+date: "3/5/2022"
+output: bookdown::html_document2
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo=TRUE)
+```
+
+```{r fig3, fig.align='center', fig.cap="Sample Default Probability by History Performance", echo=FALSE, message=FALSE}
+library(RCurl)
+library(tidyverse)
+library(kableExtra)
+
+g_c = read.csv('https://raw.githubusercontent.com/Cheng-Jipeng/ECO395M/master/data/german_credit.csv')
+
+g_c2 = g_c %>%
+  group_by(history) %>%
+  summarize(p_default = sum(Default==1)/n())
+
+ggplot(data=g_c2) +
+  geom_col(aes(x=history, y=p_default)) +
+  labs(x="History Performance", y="Default Probability")
+```
+
+```{r, message=FALSE, warning=FALSE, echo=FALSE}
+g_c_glm = glm(formula = Default ~ duration + amount + installment + age + 
+      history + purpose + foreign, family = "binomial", data = g_c)
+
+b_g_c_glm = coef(g_c_glm)[6:7]%>% as.data.frame()
+colnames(b_g_c_glm) = c("The partial effects on default probability")
+b_g_c_glm %>% round(2) %>%
+  kbl(caption = "History Variable vis-a-vis Predicting Defaults") %>%
+  kable_styling(full_width = ) 
+```
+
+The regression result implies that having worse credit is expected to reduce the probability (or more specifically, the odds) of default. The bar plot suggests that the data is constructed in such a way that it contains too many data points of default with good credit history and few default points with bad credit history, which results from the retrospective, "case-control" sampling. The data in inappropriate for building a predictive model of defaults. Because in this data set "default = ture" and "history = good" always occur together, the model would wrongly regard having good credit as an indicator for default. We recommend the bank to change their sampling scheme in order to avoid the artificial selection bias, like using random sampling.

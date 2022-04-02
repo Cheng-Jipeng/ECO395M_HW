@@ -1,3 +1,18 @@
+---
+title: "Exercise 2"
+author: "Yuting Huang, Jipeng Cheng, Weidi Hou"
+date: "3/5/2022"
+output: bookdown::html_document2
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo=FALSE)
+```
+
+# Children and hotel reservations
+## Model building
+- Feature engineering with LASSO
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 library(RCurl)
 library(tidyverse)
 library(mosaic)
@@ -7,40 +22,42 @@ library(rsample)
 library(modelr)
 library(parallel)
 library(foreach)
+library(kableExtra)
 
 # Read in data
 hotel_dev = read.csv("https://raw.githubusercontent.com/Cheng-Jipeng/ECO395M/master/data/hotels_dev.csv")
 hotel_val = read.csv("https://raw.githubusercontent.com/Cheng-Jipeng/ECO395M/master/data/hotels_val.csv")
-#// Because of no corresponding data points in hotel_val.csv, see DEBUG at the end for more details.
-# Data browsing
-ggplot(data = hotel_dev) +
-  geom_histogram(aes(x=children), binwidth=0.5)
-
-#####
-# 1. Model building
-#####
+# train/test split
 hotel_dev_split = initial_split(hotel_dev, prop = 0.8)
 hotel_dev_train = training(hotel_dev_split)
 hotel_dev_test = testing(hotel_dev_split)
-## (1) Build baseline models
+
 baseline1 = glm(children ~ market_segment + adults + customer_type + is_repeated_guest,
                 data = hotel_dev_train, family = "binomial")
 baseline2 = glm(children ~ . - arrival_date , data = hotel_dev_train, family = "binomial")
-## (2) Build best model - Feature engineering with LASSO 
-#//idea: use LASSO to find main effects + interaction by eyeballing
+```
+
+We use LASSO for feature selection by running LASSO regression and ruling out weak predictors. First, we only consider the main effects of predictors.
+```{r, echo=FALSE, warning=FALSE, message=FALSE, results='hide'}
 hotel_lasso_x_main = model.matrix(children ~  (.-1-arrival_date), data=hotel_dev_train)
 hotel_lasso_x_itac = model.matrix(children ~  (.-1-arrival_date)^2, data=hotel_dev_train)
 hotel_lasso_y = hotel_dev_train$children
 #//see https://cran.r-project.org/web/packages/gamlr/gamlr.pdf to see more
 hotel_lasso_main = cv.gamlr(hotel_lasso_x_main, hotel_lasso_y, nfold=10, verb=TRUE, family="binomial")
 hotel_lasso_itac = cv.gamlr(hotel_lasso_x_itac, hotel_lasso_y, nfold=10, verb=TRUE, family="binomial")
-#### extract strong single covariates
 coef_hotel_lasso_main = coef(hotel_lasso_main, select='min') %>% 
   as.matrix() %>% 
   as.data.frame() %>%
   filter(seg100 == 0)
-colnames(coef_hotel_lasso_main) = c("Partial effects") #// rule out 'deposit_type' by eyeballing
-#### extract strong interactions
+colnames(coef_hotel_lasso_main) = c("Partial effects")
+```
+```{r tab2, echo = FALSE}
+coef_hotel_lasso_main %>%
+  knitr::kable(caption = "Weak Partial Effects") %>%
+  kable_styling()
+```
+From Table \@ref(tab:tab2) , we see that the `deposit_type` contributes little to the prediction. Therefore, we rule out it. Then, we add interactions t0 the LASSO regression, and pick those with strong effects. 
+```{r tab3, warning=FALSE, message=FALSE, echo=FALSE}
 strong_interaction_name = coef(hotel_lasso_itac, select = 'min')@Dimnames[1] %>% as.data.frame() 
 strong_interaction_name = strong_interaction_name[coef(hotel_lasso_itac, select = 'min')@i,] 
 strong_interaction_beta = coef(hotel_lasso_itac, select = 'min')@x[-1]
@@ -52,9 +69,15 @@ coef_lasso = coef_lasso %>% # filter in strong interaction
   arrange(desc(abs_beta)) %>%
   head(30) 
 colnames(coef_lasso) = c("Strong Interaction","Partial Effects", "Absolute Values of Partial Effects")
+coef_lasso %>%
+  knitr::kable(caption = "Top 30 Strongest Predictors and Interactions") %>%
+  kable_styling()
 #// pick (meal:reserved_room_type, reserved_room_type:assigned_room_type, hotel:reserved_room_type, market_segment:reserved_room_type,
 #// meal:is_repeated_guest, adults:previous_bookings_not_canceled, meal:previous_bookings_not_canceled, market_segment:customer_type,
 #// is_repeated_guest:assigned_room_type, assigned_room_type:required_car_parking_spaces) by eyeballing
+```
+From Table \@ref(tab:tab3), we pick these interactions `meal:reserved_room_type `, ` reserved_room_type:assigned_room_type `, ` hotel:reserved_room_type `, ` market_segment:reserved_room_type `, ` meal:is_repeated_guest `, ` adults:previous_bookings_not_canceled `, ` meal:previous_bookings_not_canceled `, ` market_segment:customer_type `, ` is_repeated_guest:assigned_room_type `, ` assigned_room_type:required_car_parking_spaces` by eyeballing. 
+```{r tab4, warning=FALSE, message=FALSE, echo=FALSE}
 lasso_selected_try = glm(children ~ (.-arrival_date-deposit_type) + meal:reserved_room_type+ reserved_room_type:assigned_room_type+
                            hotel:reserved_room_type+ market_segment:reserved_room_type+meal:is_repeated_guest+ 
                            adults:previous_bookings_not_canceled+ meal:previous_bookings_not_canceled+ market_segment:customer_type+
@@ -65,12 +88,18 @@ coef_lasso_selected_try = coef(lasso_selected_try, select='min') %>%
   as.data.frame() %>%
   filter(is.na(V1))
 colnames(coef_lasso_selected_try) = c("Partial effects") 
-coef_lasso_selected_try # rule out non-converged covariates & interactions
-lasso_selected = glm(children ~ (.-arrival_date-deposit_type) + hotel:reserved_room_type+ meal:is_repeated_guest+ 
-                           adults:previous_bookings_not_canceled+ meal:previous_bookings_not_canceled+ market_segment:customer_type+
-                           is_repeated_guest:assigned_room_type+ assigned_room_type:required_car_parking_spaces, 
+coef_lasso_selected_try %>%
+  knitr::kable(caption = "Interactions That Prevent Converged LASSO") %>%
+  kable_styling()
+# rule out non-converged covariates & interactions
+```
+Finally, we rule out all the variables and interactions with `NA` according to Table \@ref(tab:tab4) since the algorithm does not converge. The selected model adds `hotel:reserved_room_type`, `meal:is_repeated_guest`, `adults:previous_bookings_not_canceled `, ` meal:previous_bookings_not_canceled `, ` market_segment:customer_type `, ` is_repeated_guest:assigned_room_type `, ` assigned_room_type:required_car_parking_spaces` as interactions.
+```{r, warning=FALSE, message=FALSE, echo=FALSE}
+lasso_selected = glm(children ~ (.-arrival_date-deposit_type) + hotel:reserved_room_type+ meal:is_repeated_guest+  adults:previous_bookings_not_canceled+ meal:previous_bookings_not_canceled+ market_segment:customer_type+ is_repeated_guest:assigned_room_type+ assigned_room_type:required_car_parking_spaces, 
                          data = hotel_dev_train, family = "binomial")
-## (3) Out-of-sample performance evaluation: likelihood/deviance/TPR/FPR/FDR
+```
+- Out-of-sample performance comparison
+```{r tab5, echo=FALSE, message=FALSE, warning=FALSE}
 ### baseline evaluation
 #### calculate deviance
 test_child_index = which(hotel_dev_test$children == 1) # find true book with children
@@ -103,17 +132,23 @@ eval_lasso_selected = c(lasso_selected_predict_deviance,
                         confusion_lasso_selected[2,2]/(confusion_lasso_selected[2,2]+confusion_lasso_selected[2,1]),
                         confusion_lasso_selected[1,2]/(confusion_lasso_selected[1,1]+confusion_lasso_selected[1,2]),
                         confusion_lasso_selected[1,2]/(confusion_lasso_selected[1,2]+confusion_lasso_selected[2,2])) %>% round(3)
+
 header.true <- function(df) {
   names(df) <- as.character(unlist(df[1,]))
   df[-1,]
 }
-rbind(measurement, eval_baseline1, eval_baseline2, eval_lasso_selected) %>% as.data.frame() %>%
-  header.true() %>%
-  rownames() = c("Baseline 1", "Baseline 2", "Best")
+eval_models = rbind(measurement, eval_baseline1, eval_baseline2, eval_lasso_selected) %>% as.data.frame() %>%
+  header.true()
+rownames(eval_models) = c("Baseline 1", "Baseline 2", "Best")
+eval_models %>%
+  knitr::kable(caption = "Out-of-sample Performance Evaulation") %>%
+  kable_styling()
+  
+```
+Table \@ref(tab:tab5) shows that our best model outperforms the other 2 baseline models.
 
-#####
-# 2. Model Validation: Step 1
-#####
+## Model validation: step 1
+```{r fig4, fig.align='center', fig.cap="ROC Curve", echo=FALSE, warning=FALSE, message=FALSE}
 ## (1) Preidcition with validation set
 phat_lasso_predict_best = predict(lasso_selected, hotel_val, type = "response")
 ## (2) Calculate TPR & FPR vs. t
@@ -126,17 +161,23 @@ ROC_df = foreach(t = t_grid, .combine='rbind') %dopar% {
   c(t=t, TPR = TPR_best, FPR = FPR_best)
 } %>% as.data.frame()
 ## (3) Plot the graph
-ggplot(ROC_df) +
-  geom_line(aes(x=t, y=TPR, color = "TPR"), size=1) +
-  geom_line(aes(x=t, y=FPR, color = "FPR"), size=1) +
-  labs(y="TPR/FPR", x = "t", color=" ")
 ### real ROC Curve (use this)  
 ggplot(ROC_df) +
   geom_line(aes(x=FPR, y=TPR), size=1) +
   labs(y="TPR", x = "FPR", color=" ")
-#####
-# 3. Model Validation: Step 2
-#####
+```
+Besides, Figure \@ref(fig:fig5) may help us select $t$ if necessary.
+```{r fig5, fig.align='center', fig.cap="TPR/FPR vs. t", echo=FALSE, message=FALSE}
+ggplot(ROC_df) +
+  geom_line(aes(x=t, y=TPR, color = "TPR"), size=1) +
+  geom_line(aes(x=t, y=FPR, color = "FPR"), size=1) +
+  labs(y="TPR/FPR", x = "t", color=" ")
+```
+
+## Model validation: step 2
+
+
+```{r fig6, fig.align='center', fig.cap="Number of Bookings with Children for Each Fold", echo=FALSE, warning=FALSE, message=FALSE}
 K_folds = 20
 
 hotel_val = hotel_val %>%
@@ -155,6 +196,13 @@ hotel_val_cv = hotel_val_cv %>%
 ggplot(data = hotel_val_cv) +
   geom_line(aes(x=fold_id, y=y, color = "Actual # of children"),  size=1) +
   geom_line(aes(x=fold_id, y=E_y, color = "Predicted # of children"), size=1) +
-  labs(y="Predicted / Actual Children for Each Fold", x = "t", color=" ")+
+  labs(y="Predicted / Actual Bookings with Children ", x = "Fold", color=" ")+
   geom_point(aes(x=fold_id, y=y)) +
   geom_point(aes(x=fold_id, y=E_y))
+
+```
+
+Figure \@ref(fig:fig6) shows that the difference of each fold for actual data and predicted model is small, which is always smaller than 5. Therefore, our model do well in predicting the total number of bookings with children in each fold.
+
+
+
