@@ -37,6 +37,7 @@ library(gbm)
 dengue = read.csv("https://raw.githubusercontent.com/Cheng-Jipeng/ECO395M/master/data/dengue.csv")
 dengue$city = factor(dengue$city)
 dengue$season = factor(dengue$season, levels=c('spring', 'summer', 'fall', 'winter'))
+dengue$season = factor(dengue$season)
 dengue = dengue %>%
   select(total_cases, city, season, specific_humidity, tdtr_k, precipitation_amt) %>%
   na.omit()
