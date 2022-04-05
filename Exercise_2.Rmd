@@ -229,7 +229,7 @@ coef_hotel_lasso_main %>%
   knitr::kable(caption = "Weak Partial Effects") %>%
   kable_styling()
 ```
-From Table \@ref(tab:tab2) , we see that the `deposit_type` contributes little to the prediction. Therefore, we rule out it. Then, we add interactions t0 the LASSO regression, and pick those with strong effects. 
+From Table \@ref(tab:tab2) , we see that the `deposit_type` contributes little to the prediction. This is because every value of `deposit_type` has zero partial effects; as a contrast, though some values of `meal` have no effects like `mealHB` and `mealUndefined`, other values of `meal` still contribute to the model. Therefore, we rule out it. Then, we add interactions to the LASSO regression, and pick those with strong effects. 
 ```{r tab3, warning=FALSE, message=FALSE, echo=FALSE}
 strong_interaction_name = coef(hotel_lasso_itac, select = 'min')@Dimnames[1] %>% as.data.frame() 
 strong_interaction_name = strong_interaction_name[coef(hotel_lasso_itac, select = 'min')@i,] 
