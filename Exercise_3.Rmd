@@ -14,18 +14,17 @@ knitr::opts_chunk$set(echo=FALSE)
 ### Problem 1: What causes what?
 **Question 1. Why can’t I just get data from a few different cities and run the regression of “Crime” on “Police” to understand how more cops in the streets affect crime? (“Crime” refers to some measure of crime rate and “Police” measures the number of cops in a city.)**
 
-answer: In this question of "Crime" and "Police", there is a problem of endogeneity circle. if we use the simple linear regresstion model $$y=beta_1+beta_2 * x+u$$, there is a problem of endogeneity, i.e.
+answer: In this question of "Crime" and "Police", there is a problem of endogeneity circle. if we use the simple linear regression model $$y=beta_1+beta_2 * x+u$$, there is a problem of endogeneity, i.e.
 E(xu)≠0. Under is circumstance, inconsistency of OLS arises due to the fact that
-changes in x(police force) are associated not only with chages in y(crime), but
+changes in x(police force) are associated not only with changes in y(crime), but
 also change in u.
 
 **Question2. How were the researchers from UPenn able to isolate this effect? Briefly describe their approach and discuss their result in the “Table 2” below, from the researchers' paper.**
 
-answer: In the paper, the authors use a "high-alert periods" dummy variable to 
-break the circle of endogeneity to estimate the effect of police on crime. The 
+answer: In this paper, the authors use a "high-alert periods" dummy variable to 
+break the circle of endogeneity so that to estimate the effect of police on crime. The 
 reason why the authors choose "high-alert periods" is that the primary purpose of 
-the HSAS is to inform and coordinate the antiterrorism efforts of all federal agencies. So, it the level of alert will directly impact the number of police on the
-specific district. In addition, the authors use daily data to make sure the "treatment windows" are short. Plus, the choosing data includes the information repeated terror alert, so it reduces the possibility of spurious correlation. Furthermore, the model also uses a "Metro ridership" variable to test whether there is a correlation between tourism and crime. At last, the authors use dummy variables for each day of the week to control for day effects. 
+the HSAS is to inform and coordinate the antiterrorism efforts of all federal agencies. So, the level of alert will directly impact the number of police on the specific district. In addition, the authors use daily data to make sure the "treatment windows" are short. Plus, they chose data which includes the information repeated terror alert, so it reduces the possibility of spurious correlation. Furthermore, the model also uses a "Metro ridership" variable to test whether there is a correlation between tourism and crime. At last, the authors use dummy variables for each day of the week to control for day effects. 
 
 From the Table 2 column 1, the coefficient on the alert level is statistically significant at the 5 percent level and indicates that on high-alert days, total crimes decrease by an average of seven crimes per day, or approximately 6.6 percent. From the Table 2 column 2, we verify that high-alert levels are not being confounded with tourism levels by including logged midday Metro ridership directly in the regression. The coefficient on the alert level is slightly smaller, at -6.2 crimes per day. We also find that increased Metro ridership is correlated with an increase in crime. The increase, however, is very small, a 10 percent increase in Metro ridership increases the number of crimes by only 1.7 per day on average. Thus, given that midday Metro ridership is a good proxy for tourism, changes in the number of tourists cannot explain the systematic change in crime that we estimate.
 
@@ -114,7 +113,7 @@ library(pdp)
 
 #### Overview
 
-As landlords and renters, what they mostly care about is their possible revenue per square foot per calendar year. As we all know, their revenue depends on many factors, such as the age, facilities, amenities , leasing rate and so on. Nowadays, people pay more attention on their living environment when renting a house, such as whether this landload has a green certification. Therefore, it's meaningful to do some research on the relationship between rental income and green certification.
+As landlords or renters, what they mostly care about is their possible revenue per square foot per calendar year. As we all know, their revenue depends on many factors, such as the building age, facilities, amenities , building size and so on. Nowadays, people pay more attention to their living environment when renting a house, such as whether the landlord has a green certification. Therefore, it's meaningful to do some research on the relationship between rental income and green certification.
 
 In our report, we build our best predictive model possible for revenue per square foot per calendar year and to use this model to quantify the average change in rental income per square foot associated with green certification, holding other features of the building constant.
 
@@ -199,16 +198,17 @@ boost1 = gbm(revenue ~ cluster + size + empl_gr + stories + age + renovated + cl
 
 rmse(boost1, greenbuildings_test)
 ```
-By using the tree model to build our predictive model, we identify the association between rental revenue and green certification. We first split the new greenbuilds data set into training and test test, then we use two different tree methods: random forest and boosted regression trees to build our model. Then we calculate the out of sample RMSE. The result shows that the RMSE of the random forest model is lower that the one using boosted regression trees. Therefore, we choose to use random forest method.
+By using the tree model to build our predictive model, we identify the association between rental revenue and green certification. We first split the new greenbuildings data set into training and test set, then we use two different tree methods: random forest and boosted regression trees to build our model. Then we calculate the out of sample RMSE. The result shows that the RMSE of the random forest model is lower that that using boosted regression trees. Therefore, we choose to use random forest method.
 
 #### Results
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, alert=FALSE}
 varImpPlot(greenbuildings_rforest, type=1, main = "Importantce of Variables")
 ```
-**Figure 1:** Figure of all features used in our predictive model descending by importance.
 
-From Figure 1, we found that the most important features that landlords should consider are "size, age, stories", these variables seems to be the most important. However, the "green_rating" variable is not that important from our observation.
+**Figure 1:** Figure of all features descending by importance
+
+From Figure 1, we found that the most important features that landlords should consider are "size, stories, age", these variables seems to be the most important. However, the "green_rating" variable is not that important from our observation.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, alert=FALSE}
 ggplot(data=greenbuildings_new) +
@@ -220,7 +220,7 @@ ggplot(data=greenbuildings_new) +
 
 **Figure 2:** Impact of Green Certifications on Revenue
 
-From the box plot including the information between revenue and green_rating, the average rent per square foot is around 20 for buildings with a green certification, and around 24 for those without a certification. Therefore, we didn't find significant difference between buildings with or without green certification.
+The box plot includes the information between revenue and green_rating, the average revenue per square foot is around 20 for buildings with a green certification, and around 24 for those without a certification. Therefore, we didn't find significant difference between buildings with or without green certification.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, alert=FALSE}
 greenbuildings_test = mutate(greenbuildings_test, predict_rent = predict(greenbuildings_rforest,greenbuildings_test))
@@ -233,7 +233,7 @@ gmean
 
 **Table 1:** The average change in revenue per square foot related to green certification
 
-We then calculate the average change in revenue per square foot for buildings with or without green certification. From the table above, we found that buildings with green certification get more revenue than those without green certification, but the impact is small, considering the difference is 2 unit.
+We then calculate the average change in revenue per square foot for buildings with or without green certification. From the table above, we found that buildings with green certification get more revenue than those without green certification, but the impact is small, considering the difference is about 2 unit.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, alert=FALSE}
 partialPlot(greenbuildings_rforest, greenbuildings_test, 'green_rating', 
@@ -248,7 +248,7 @@ From the partial effect figure of green certification on revenue per square foot
 
 #### Conclusion
 
-From our analysis, we build the model using random forest to estimate the association between green certification and revenue per square foot. From our results, we found that green certification has some positive impact on revenue, but the impact isn't very significant. In addition, we found that these variables "size, age, stories" have more impact on revenue. Based on our research, the landlords should weigh the pros and cons of getting a green certification, thinking critically about the cost and revenue change of getting a green certification. If they figure that the income change isn't overweigh the cost of getting a certification, they should focus on other features, which have more important impact on revenue.
+From our analysis, we build the model using random forest to estimate the association between green certification and revenue per square foot per year. From our results, we found that green certification has some positive impact on revenue, but the impact isn't very significant. In addition, we found that these variables "size, age, stories" have more impact on revenue. Based on our research, the landlords should weigh the pros and cons of getting a green certification, thinking critically about the cost and revenue change of getting a green certification. If they figure that the income change doesn't overweigh the cost of getting a certification, they should focus on other features, which have more important impact on revenue.
 
 ### Problem 4: Predictive model building: California housing
 
