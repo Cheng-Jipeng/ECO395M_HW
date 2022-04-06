@@ -59,7 +59,7 @@ greenbuildings = read.csv("~/Desktop/greenbuildings.csv")
 greenbuildings_new = greenbuildings %>% 
   filter(is.na(empl_gr) == FALSE)
 
-greenbuildings_new = mutate(greenbuildings_tree,
+greenbuildings_new = mutate(greenbuildings_new,
                    revenue = Rent*leasing_rate*0.01)
 ```
 
