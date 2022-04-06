@@ -54,7 +54,7 @@ In our report, we build our best predictive model possible for revenue per squar
 ## Data and research design
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, results='hide'}
-greenbuildings = read.csv("~/Desktop/greenbuildings.csv")
+greenbuildings = read.csv("https://raw.githubusercontent.com/Cheng-Jipeng/ECO395M/master/data/greenbuildings.csv")
 
 greenbuildings_new = greenbuildings %>% 
   filter(is.na(empl_gr) == FALSE)
