@@ -6,6 +6,9 @@ library(rpart.plot)
 library(rsample) 
 library(randomForest)
 library(gbm)
+library(kableExtra)
+
+install.packages("kableExtra")
 
 
 # Read data #
@@ -32,13 +35,17 @@ dengue_forest = randomForest(total_cases ~ city + season + specific_humidity + t
 # boosting #
 dengue_boost = gbm(total_cases ~ city + season + specific_humidity + tdtr_k + 
                precipitation_amt, data=dengue_train, cv.folds = 10,
-             interaction.depth=4, n.trees=500, shrinkage=.05)
+             interaction.depth=4, n.trees=500, shrinkage=.05, distribution = "gaussian")
 ### gbm.perf(dengue_boost)
 
 # compare RMSE on the test set #
+# compare RMSE on the test set #
 cbind(modelr::rmse(dengue_tree, dengue_test), 
       modelr::rmse(dengue_forest, dengue_test),
-      modelr::rmse(dengue_boost, dengue_test)) 
+      modelr::rmse(dengue_boost, dengue_test)) %>%
+  knitr::kable(caption = "The RMSEs of Models",
+               col.names = c("dengue_tree", "dengue_forest", "dengue_boost")) %>%
+  kable_styling(full_width = F)
 ## Use Kable to name columns in .Rmd. The results suggest that random forests model
 ## have the best performance on the testing data.
 
