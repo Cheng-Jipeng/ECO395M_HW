@@ -2,7 +2,7 @@
 title: "Exercise 3"
 author: "Yuting Huang, Jipeng Cheng, Weidi Hou"
 date: "4/5/2022"
-output: bookdown::html_document2
+output: md_document
 ---
 
 ```{r setup, include=FALSE}
