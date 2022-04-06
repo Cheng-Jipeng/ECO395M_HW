@@ -77,7 +77,7 @@ dengue_forest = randomForest(total_cases ~ city + season + specific_humidity + t
 # boosting #
 dengue_boost = gbm(total_cases ~ city + season + specific_humidity + tdtr_k + 
                precipitation_amt, data=dengue_train, cv.folds = 10,
-             interaction.depth=4, n.trees=500, shrinkage=.05)
+             interaction.depth=4, n.trees=500, shrinkage=.05, distribution = "gaussian")
 ### gbm.perf(dengue_boost)
 
 # compare RMSE on the test set #
@@ -89,7 +89,7 @@ cbind(modelr::rmse(dengue_tree, dengue_test),
   kable_styling(full_width = F)
 ```
 
-Use Kable to name columns in .Rmd. The results suggest that random forests mode have the best performance on the testing data.
+The results suggest that random forests mode have the best performance on the testing data.
 
 ```{r warning=FALSE, echo=FALSE, message=FALSE, alert=FALSE}
 # Plot partial dependence functions #
@@ -135,7 +135,7 @@ greenbuildings_new = mutate(greenbuildings_new,
 
 In our raw data set, there are 7,894 data points. We first filter out those missing data. Now, our new greenbuildings data set has 7820 data points. 
 
-##### predictive variable and features
+##### Predictive variable and features
 
 The predictive variable is revenue per square foot per year, which is the product of two terms: rent and leasing_rate. 
 
@@ -183,7 +183,7 @@ The features used to build our model are:
     
     (22)City_Market_Rent: a measure of average rent per square-foot per calendar year in the building's local market.
 
-#### research design
+#### Research design
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, alert=FALSE}
 greenbuildings_split =  initial_split(greenbuildings_new, prop=0.8)
@@ -256,7 +256,7 @@ From our analysis, we build the model using random forest to estimate the associ
 Our purpose is to build the best predictive model to forecast the median house value in California. According to the topic description, in the beginning, we have to conduct standardized processing for "totalRooms" and  totalBedrooms" by creating the new variables including "sdrooms" and "sdbedrooms". Then we utilized three different methods including Step wise, Random Forecast and boost, to build the best predictive model. 
 
 
-```{r warning=FALSE, echo=FALSE, message=FALSE, alert=FALSE}
+```{r warning=FALSE, echo=FALSE, message=FALSE, alert=FALSE, include=FALSE}
 library(tidyverse)
 library(randomForest)
 library(mosaic)
@@ -271,6 +271,7 @@ library(scales)
 library(ggmap)
 library(lubridate)
 library(randomForest)
+library(kableExtra)
 
 cahousing = read.csv("https://raw.githubusercontent.com/Cheng-Jipeng/ECO395M/master/data/CAhousing.csv")
 
@@ -305,12 +306,35 @@ cahousing_boost
 
 Now, we estimate their RMSE to find out which model is our best predictive model.
 
-```{r warning=FALSE, echo=FALSE, message=FALSE, alert=FALSE}
+```{r warning=FALSE, echo=FALSE, message=FALSE, alert=FALSE, include=FALSE}
 rmse(lm_medium, cahousing_test)
 rmse(lm_step, cahousing_test)
 rmse(cahousing_tree, cahousing_test)
 rmse(cahousing_forest, cahousing_test)
 rmse(cahousing_boost, cahousing_test)
+
+
+cbind(modelr::rmse(lm_medium, cahousing_test), 
+      modelr::rmse(lm_step, cahousing_test),
+      modelr::rmse(cahousing_tree, cahousing_test),
+      modelr::rmse(cahousing_forest, cahousing_test),
+      modelr::rmse(cahousing_boost, cahousing_test)) %>%
+  knitr::kable(caption = "The RMSEs of Models",
+               col.names = c("lm_medium", "lm_step", "dengue_boost", "cahousing_forest", "cahousing_boost")) %>%
+  kable_styling(full_width = F)
+```
+
+
+```{r warning=FALSE, echo=FALSE, message=FALSE, alert=FALSE}
+
+cbind(modelr::rmse(lm_medium, cahousing_test), 
+      modelr::rmse(lm_step, cahousing_test),
+      modelr::rmse(cahousing_tree, cahousing_test),
+      modelr::rmse(cahousing_forest, cahousing_test),
+      modelr::rmse(cahousing_boost, cahousing_test)) %>%
+  knitr::kable(caption = "The RMSEs of Models",
+               col.names = c("lm_medium", "lm_step", "dengue_boost", "cahousing_forest", "cahousing_boost")) %>%
+  kable_styling(full_width = F)
 ```
 
 According to our results, we can find the Random Forecast model has lower RMSE, so we use this to build our best predictive model.
