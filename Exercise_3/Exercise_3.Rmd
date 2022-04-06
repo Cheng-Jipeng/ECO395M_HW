@@ -2,10 +2,7 @@
 title: "Exercise 3"
 author: "Yuting Huang, Jipeng Cheng, Weidi Hou"
 date: "4/5/2022"
-output:
-  pdf_document: default
-  html_document: default
-  word_document: default
+output: bookdown::html_document2
 ---
 
 ```{r setup, include=FALSE}
@@ -196,7 +193,7 @@ greenbuildings_rforest = randomForest(revenue ~ cluster + size + empl_gr + stori
 modelr::rmse(greenbuildings_rforest, greenbuildings_test) 
 
 # Boosting 
-boost1 = gbm(revenue ~ cluster + size + empl_gr + stories + age + renovated + class_a + class_b + green_rating + net + amenities + cd_total_07 + hd_total07 + total_dd_07 + Precipitation + Gas_Costs + Electricity_Costs + City_Market_Rent, data = greenbuildings_train, interaction.depth=4, n.trees=350, shrinkage=.05)
+boost1 = gbm(revenue ~ cluster + size + empl_gr + stories + age + renovated + class_a + class_b + green_rating + net + amenities + cd_total_07 + hd_total07 + total_dd_07 + Precipitation + Gas_Costs + Electricity_Costs + City_Market_Rent, data = greenbuildings_train, interaction.depth=4, n.trees=350, shrinkage=.05, distribution="gaussian")
 
 rmse(boost1, greenbuildings_test)
 ```
