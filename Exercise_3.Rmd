@@ -30,11 +30,11 @@ From the Table 2 column 1, the coefficient on the alert level is statistically s
 
 **Question3. Why did they have to control for Metro ridership? What was that trying to capture?**
 
-In order to test a hypothesis that tourism is reduced on high-alert days, and as a result, there are fewer potential victims, which leads to fewer crimes.
+answer: In order to test a hypothesis that tourism is reduced on high-alert days, and as a result, there are fewer potential victims, which leads to fewer crimes.
 
 **Question4. Below I am showing you "Table 4" from the researchers' paper. Just focus on the first column of the table. Can you describe the model being estimated here? What is the conclusion?**
 
-The model in table 4 includes district fixed effects in order to distinguish the peculiar crime pattern of each district, and all regressions contain day-of-the-week fixed effects. The dependent variable is daily crime totals by district. From Table 4, During periods of high alert, crime in the National Mall area decreases by 2.62 crimes per day. Crime also decreases in the other districts, by 0.571 crimes per day, but this effect is not statistically significant. Since there are 17.1 crimes on the district 1, the declination during high-alert days is approximately 15 percent, which means almost one-half of the total crime decline during high-alert periods is concentrated in District 1. In addition, The result elasticity of crime with respect to police is -0.3, which is consistent with other researchers' results. 
+answer: The model in table 4 includes district fixed effects in order to distinguish the peculiar crime pattern of each district, and all regressions contain day-of-the-week fixed effects. The dependent variable is daily crime totals by district. From Table 4, During periods of high alert, crime in the National Mall area decreases by 2.62 crimes per day. Crime also decreases in the other districts, by 0.571 crimes per day, but this effect is not statistically significant. Since there are 17.1 crimes on the district 1, the declination during high-alert days is approximately 15 percent, which means almost one-half of the total crime decline during high-alert periods is concentrated in District 1. In addition, The result elasticity of crime with respect to police is -0.3, which is consistent with other researchers' results. 
 
 
 
