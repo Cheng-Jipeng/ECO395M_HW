@@ -2,11 +2,13 @@
 title: "Exercise 3"
 author: "Yuting Huang, Jipeng Cheng, Weidi Hou"
 date: "4/5/2022"
-output: md_document
+output:
+  bookdown::html_document2: default
+  md_document: default
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo=TRUE)
+```{r setup, include=FALSE, cache=TRUE}
+knitr::opts_chunk$set(echo=FALSE)
 ```
 
 ### Problem 1: What causes what?
