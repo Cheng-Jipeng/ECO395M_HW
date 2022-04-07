@@ -243,7 +243,7 @@ partialPlot(greenbuildings_rforest2, greenbuildings_new, 'green_rating',
             main = "The Partial Effect of Green Certifications on Revenue")
 ```
 
-From \@ref(fig:fig4), we found a positive association between revenue and green certification, which means green certification is expected to increase revenue per square foot per year by $65.37967$ on average holding all else fixed.
+From Figure \@ref(fig:fig4), we found a positive association between revenue and green certification, which means green certification is expected to increase revenue per square foot per year by $65.37967$ on average holding all else fixed.
 
 ## Conclusion
 
@@ -369,4 +369,4 @@ modelerror = qmplot(x = longitude,
 modelerror
 ```
 
-We can find that above graphs perform well, because \@ref(fig:fig5) almost match \@ref(fig:fig6). Therefore, we can confirm that the random forest model does well in the prediction. In conclusion, our predictive model is effective, then we may use this predictive model to forecast other states or areas in United State.
+We can find that above graphs perform well, because Figure \@ref(fig:fig5) almost match Figure \@ref(fig:fig6). Therefore, we can confirm that the random forest model does well in the prediction. In conclusion, our predictive model is effective, then we may use this predictive model to forecast other states or areas in United State.
