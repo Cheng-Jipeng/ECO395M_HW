@@ -2,43 +2,40 @@
 title: "Exercise 3"
 author: "Yuting Huang, Jipeng Cheng, Weidi Hou"
 date: "4/5/2022"
-output:
-  bookdown::html_document2: default
-  md_document: default
+output: bookdown::html_document2
 ---
 
 ```{r setup, include=FALSE, cache=TRUE}
 knitr::opts_chunk$set(echo=FALSE)
 ```
 
-### Problem 1: What causes what?
+# What causes what?
 **Question 1. Why can’t I just get data from a few different cities and run the regression of “Crime” on “Police” to understand how more cops in the streets affect crime? (“Crime” refers to some measure of crime rate and “Police” measures the number of cops in a city.)**
 
-answer: In this question of "Crime" and "Police", there is a problem of endogeneity circle. if we use the simple linear regression model $$y=beta_1+beta_2 * x+u$$, there is a problem of endogeneity, i.e.
-E(xu)≠0. Under is circumstance, inconsistency of OLS arises due to the fact that
+Answer: In this question of "Crime" and "Police", there is a problem of endogeneity circle. if we use the simple linear regression model $$y=\beta_1+\beta_2 * x+u$$, there is a problem of endogeneity, i.e. $E(xu)≠0$. Under this circumstance, inconsistency of OLS arises due to the fact that
 changes in x(police force) are associated not only with changes in y(crime), but
 also change in u.
 
 **Question2. How were the researchers from UPenn able to isolate this effect? Briefly describe their approach and discuss their result in the “Table 2” below, from the researchers' paper.**
 
-answer: In this paper, the authors use a "high-alert periods" dummy variable to 
+Answer: In this paper, the authors use a "high-alert periods" dummy variable to 
 break the circle of endogeneity so that to estimate the effect of police on crime. The 
 reason why the authors choose "high-alert periods" is that the primary purpose of 
-the HSAS is to inform and coordinate the antiterrorism efforts of all federal agencies. So, the level of alert will directly impact the number of police on the specific district. In addition, the authors use daily data to make sure the "treatment windows" are short. Plus, they chose data which includes the information repeated terror alert, so it reduces the possibility of spurious correlation. Furthermore, the model also uses a "Metro ridership" variable to test whether there is a correlation between tourism and crime. At last, the authors use dummy variables for each day of the week to control for day effects. 
+the HSAS is to inform and coordinate the anti-terrorism efforts of all federal agencies. So, the level of alert will directly impact the number of police on the specific district. In addition, the authors use daily data to make sure the "treatment windows" are short. Plus, they chose data which includes the information repeated terror alert, so it reduces the possibility of spurious correlation. Furthermore, the model also uses a "Metro ridership" variable to test whether there is a correlation between tourism and crime. At last, the authors use dummy variables for each day of the week to control for day effects. 
 
 From the Table 2 column 1, the coefficient on the alert level is statistically significant at the 5 percent level and indicates that on high-alert days, total crimes decrease by an average of seven crimes per day, or approximately 6.6 percent. From the Table 2 column 2, we verify that high-alert levels are not being confounded with tourism levels by including logged midday Metro ridership directly in the regression. The coefficient on the alert level is slightly smaller, at -6.2 crimes per day. We also find that increased Metro ridership is correlated with an increase in crime. The increase, however, is very small, a 10 percent increase in Metro ridership increases the number of crimes by only 1.7 per day on average. Thus, given that midday Metro ridership is a good proxy for tourism, changes in the number of tourists cannot explain the systematic change in crime that we estimate.
 
 **Question3. Why did they have to control for Metro ridership? What was that trying to capture?**
 
-answer: In order to test a hypothesis that tourism is reduced on high-alert days, and as a result, there are fewer potential victims, which leads to fewer crimes.
+Answer: In order to test a hypothesis that tourism is reduced on high-alert days, and as a result, there are fewer potential victims, which leads to fewer crimes.
 
 **Question4. Below I am showing you "Table 4" from the researchers' paper. Just focus on the first column of the table. Can you describe the model being estimated here? What is the conclusion?**
 
-answer: The model in table 4 includes district fixed effects in order to distinguish the peculiar crime pattern of each district, and all regressions contain day-of-the-week fixed effects. The dependent variable is daily crime totals by district. From Table 4, During periods of high alert, crime in the National Mall area decreases by 2.62 crimes per day. Crime also decreases in the other districts, by 0.571 crimes per day, but this effect is not statistically significant. Since there are 17.1 crimes on the district 1, the declination during high-alert days is approximately 15 percent, which means almost one-half of the total crime decline during high-alert periods is concentrated in District 1. In addition, The result elasticity of crime with respect to police is -0.3, which is consistent with other researchers' results. 
+Answer: The model in table 4 includes district fixed effects in order to distinguish the peculiar crime pattern of each district, and all regressions contain day-of-the-week fixed effects. The dependent variable is daily crime totals by district. From Table 4, During periods of high alert, crime in the National Mall area decreases by 2.62 crimes per day. Crime also decreases in the other districts, by 0.571 crimes per day, but this effect is not statistically significant. Since there are 17.1 crimes on the district 1, the declination during high-alert days is approximately 15 percent, which means almost one-half of the total crime decline during high-alert periods is concentrated in District 1. In addition, The result elasticity of crime with respect to police is -0.3, which is consistent with other researchers' results. 
 
 
 
-### Problem 2: Tree modeling: dengue cases
+# Tree modeling: dengue cases
 
 ```{r warning=FALSE, echo=FALSE, message=FALSE, alert=FALSE}
 library(RCurl)
@@ -50,6 +47,9 @@ library(rsample)
 library(randomForest)
 library(gbm)
 library(kableExtra)
+library(ggplot2)
+library(ggpubr)
+library(dplyr)
 
 # Read data #
 dengue = read.csv("https://raw.githubusercontent.com/Cheng-Jipeng/ECO395M/master/data/dengue.csv")
@@ -82,22 +82,22 @@ dengue_boost = gbm(total_cases ~ city + season + specific_humidity + tdtr_k +
 cbind(modelr::rmse(dengue_tree, dengue_test), 
       modelr::rmse(dengue_forest, dengue_test),
       modelr::rmse(dengue_boost, dengue_test)) %>%
-  knitr::kable(caption = "The RMSEs of Models",
-               col.names = c("dengue_tree", "dengue_forest", "dengue_boost")) %>%
+  knitr::kable(caption = "The RMSEs of Tree Models",
+               col.names = c("CART", "Random Forest", "Boosting")) %>%
   kable_styling(full_width = F)
 ```
 
-The results suggest that random forests mode have the best performance on the testing data.
+The results suggest that random forest model have the best performance on the testing data.
 
-```{r warning=FALSE, echo=FALSE, message=FALSE, alert=FALSE}
+```{r, echo=FALSE, message=FALSE}
 # Plot partial dependence functions #
 partialPlot(dengue_forest, dengue_test, 'specific_humidity', las=1)
 partialPlot(dengue_forest, dengue_test, 'precipitation_amt', las=1)
-partialPlot(dengue_forest, dengue_test, 'season', las=1) 
+partialPlot(dengue_forest, dengue_test, 'season', las=1)
 ```
 
 
-### Problem 3: Predictive model building: green certification
+# Predictive model building: green certification
 ```{r echo=FALSE, message=FALSE, warning=FALSE, alert=FALSE}
 library(tidyverse)
 library(ggplot2)
@@ -109,150 +109,150 @@ library(lubridate)
 library(modelr)
 library(gbm)
 library(pdp)
+library(caret)
+library(gamlr)
+library(kableExtra)
 ```
 
-#### Overview
+## Overview
 
-As landlords or renters, what they mostly care about is their possible revenue per square foot per calendar year. As we all know, their revenue depends on many factors, such as the building age, facilities, amenities , building size and so on. Nowadays, people pay more attention to their living environment when renting a house, such as whether the landlord has a green certification. Therefore, it's meaningful to do some research on the relationship between rental income and green certification.
+As landlords or renters, what they mostly care about is their possible revenue per square foot per calendar year. As we all know, leasing revenue depends on many factors, such as the building age, facilities, amenities, building size and so on. Nowadays, people pay more attention to their living environment when renting a house, such as whether the landlord has a green certification. Therefore, it's meaningful to do some research on the relationship between rental income and green certification.
 
-In our report, we build our best predictive model possible for revenue per square foot per calendar year and to use this model to quantify the average change in rental income per square foot associated with green certification, holding other features of the building constant.
+In our report, we build possibly the best predictive model for revenue per square foot per calendar year and to use this model to quantify the average change in rental income per square foot associated with green certification, holding other features of the building constant.
 
-#### Data and research design
+## Data and research design
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, alert=FALSE}
 greenbuildings = read.csv("https://raw.githubusercontent.com/Cheng-Jipeng/ECO395M/master/data/greenbuildings.csv")
 
 greenbuildings_new = greenbuildings %>% 
-  filter(is.na(empl_gr) == FALSE)
-
-greenbuildings_new = mutate(greenbuildings_new,
-                   revenue = Rent*leasing_rate*0.01)
+  mutate(revenue = Rent * leasing_rate) %>%
+  select(-c(CS_PropertyID, Rent, leasing_rate, LEED, Energystar)) %>%
+  na.omit()
+greenbuildings_new$green_rating = factor(greenbuildings_new$green_rating)
 ```
 
-##### Data
+### Data
 
-In our raw data set, there are 7,894 data points. We first filter out those missing data. Now, our new greenbuildings data set has 7820 data points. 
+In our raw data set, there are 7,820 data points. We first filter out the missing data. Now, our new `greenbuildings` data set has 7820 observations. 
 
-##### Predictive variable and features
+### Predictive variable and features
 
 The predictive variable is revenue per square foot per year, which is the product of two terms: rent and leasing_rate. 
 
 The features used to build our model are: 
     
-    (1) CS.PropertyID: the building's unique identifier in the database.
+    (1) cluster: an identifier for the building cluster, with each cluster containing one green-certified building and at least one other non-green-certified building within a quarter-mile radius of the cluster center.
     
-    (2) cluster: an identifier for the building cluster, with each cluster containing one green-certified building and at least one other non-green-certified building within a quarter-mile radius of the cluster center.
+    (2) size: the total square footage of available rental space in the building.
     
-    (3) size: the total square footage of available rental space in the building.
+    (3) empl.gr: the year-on-year growth rate in employment in the building's geographic region.
     
-    (4) empl.gr: the year-on-year growth rate in employment in the building's geographic region.
+    (4) stories: the height of the building in stories.
     
-    (5) Rent: the rent charged to tenants in the building, in dollars per square foot per calendar year.
+    (5) age: the age of the building in years.
     
-    (6) leasing.rate: a measure of occupancy; the fraction of the building's available space currently under lease.
+    (6) renovated: whether the building has undergone substantial renovations during its lifetime.
     
-    (7) stories: the height of the building in stories.
+    (7) (8) class.a, class.b: indicators for two classes of building quality (the third is Class C). These are relative classifications within a specific market. Class A buildings are generally the highest-quality properties in a given market. Class B buildings are a notch down, but still of reasonable quality. Class C buildings are the least desirable properties in a given market.
     
-    (8) age: the age of the building in years.
+    (9) green.rating: an indicator for whether the building is either LEED- or EnergyStar-certified.
     
-    (9) renovated: whether the building has undergone substantial renovations during its lifetime.
+    (10) net: an indicator as to whether the rent is quoted on a "net contract" basis. Tenants with net-rental contracts pay their own utility costs, which are otherwise included in the quoted rental price.
     
-    (10) (11) class.a, class.b: indicators for two classes of building quality (the third is Class C). These are relative classifications within a specific market. Class A buildings are generally the highest-quality properties in a given market. Class B buildings are a notch down, but still of reasonable quality. Class C buildings are the least desirable properties in a given market.
-    
-    (12) green.rating: an indicator for whether the building is either LEED- or EnergyStar-certified.
-    
-    (13) LEED, Energystar: indicators for the two specific kinds of green certifications.
-    
-    (14) net: an indicator as to whether the rent is quoted on a "net contract" basis. Tenants with net-rental contracts pay their own utility costs, which are otherwise included in the quoted rental price.
-    
-    (15) amenities: an indicator of whether at least one of the following amenities is available on-site: bank, convenience store, dry cleaner, restaurant, retail shops, fitness center.
+    (11) amenities: an indicator of whether at least one of the following amenities is available on-site: bank, convenience store, dry cleaner, restaurant, retail shops, fitness center.
    
-    (16) cd.total.07: number of cooling degree days in the building's region in 2007. A degree day is a measure of demand for energy; higher values mean greater demand. Cooling degree days are measured relative to a baseline outdoor temperature, below which a building needs no cooling.
+    (12) cd.total.07: number of cooling degree days in the building's region in 2007. A degree day is a measure of demand for energy; higher values mean greater demand. Cooling degree days are measured relative to a baseline outdoor temperature, below which a building needs no cooling.
     
-    (17) hd.total07: number of heating degree days in the building's region in 2007. Heating degree days are also measured relative to a baseline outdoor temperature, above which a building needs no heating.
+    (13) hd.total07: number of heating degree days in the building's region in 2007. Heating degree days are also measured relative to a baseline outdoor temperature, above which a building needs no heating.
     
-    (18) total.dd.07: the total number of degree days (either heating or cooling) in the building's region in 2007.
+    (14) total.dd.07: the total number of degree days (either heating or cooling) in the building's region in 2007.
     
-    (19) Precipitation: annual precipitation in inches in the building's geographic region.
+    (15) Precipitation: annual precipitation in inches in the building's geographic region.
     
-    (20) Gas.Costs: a measure of how much natural gas costs in the building's geographic region.
+    (16) Gas.Costs: a measure of how much natural gas costs in the building's geographic region.
    
-    (21)Electricity.Costs: a measure of how much electricity costs in the building's geographic region.
+    (17) Electricity.Costs: a measure of how much electricity costs in the building's geographic region.
     
-    (22)City_Market_Rent: a measure of average rent per square-foot per calendar year in the building's local market.
+    (18) City_Market_Rent: a measure of average rent per square-foot per calendar year in the building's local market.
 
-#### Research design
+## Research design
 
-```{r echo=FALSE, message=FALSE, warning=FALSE, alert=FALSE}
+```{r tab1, echo=FALSE, message=FALSE, warning=FALSE, alert=FALSE}
 greenbuildings_split =  initial_split(greenbuildings_new, prop=0.8)
 greenbuildings_train = training(greenbuildings_split)
 greenbuildings_test  = testing(greenbuildings_split)
 
 # Random forests
-greenbuildings_rforest = randomForest(revenue ~ cluster + size + empl_gr + stories + age + renovated + class_a + class_b + green_rating + net + amenities +  cd_total_07 + hd_total07 + total_dd_07 + Precipitation + Gas_Costs + Electricity_Costs + City_Market_Rent, data = greenbuildings_train, importance = TRUE)
-
-modelr::rmse(greenbuildings_rforest, greenbuildings_test) 
+greenbuildings_rforest = randomForest(revenue ~ ., data = greenbuildings_train, importance = TRUE)
 
 # Boosting 
-boost1 = gbm(revenue ~ cluster + size + empl_gr + stories + age + renovated + class_a + class_b + green_rating + net + amenities + cd_total_07 + hd_total07 + total_dd_07 + Precipitation + Gas_Costs + Electricity_Costs + City_Market_Rent, data = greenbuildings_train, interaction.depth=4, n.trees=350, shrinkage=.05, distribution="gaussian")
+boost1 = gbm(revenue ~ ., data = greenbuildings_train, interaction.depth=4, n.trees=350, shrinkage=.05, distribution="gaussian")
 
-rmse(boost1, greenbuildings_test)
+# KNN
+grbds_knn = train(revenue ~ ., data = greenbuildings_train, method="knn",
+                  trControl=trainControl(method="cv",number=5),
+                  preProc = c("center", "scale"))
+grbds_knn_pred = predict(grbds_knn, newdata = greenbuildings_test)
+
+
+# LASSO
+grbds_lasso_X = model.matrix(revenue ~ .-1, data=greenbuildings_train)
+grbds_lasso_Y = greenbuildings_train$revenue
+grbds_lasso = cv.gamlr(grbds_lasso_X, grbds_lasso_Y, scale=TRUE, nfold=5)
+grbds_lasso_X_val = model.matrix(revenue ~ .-1, data = greenbuildings_test)
+grbds_lasso_predict_min = predict(grbds_lasso, grbds_lasso_X_val, select="min") %>%
+  as.matrix() %>% as.data.frame() 
+grbds_lasso_Y_test = greenbuildings_test$revenue %>% as.data.frame()
+
+# compare RMSE on the test set #
+cbind(modelr::rmse(greenbuildings_rforest, greenbuildings_test), 
+      rmse(boost1, greenbuildings_test),
+      (grbds_knn_pred-greenbuildings_test$revenue)^2 %>% mean() %>% sqrt(),
+      (grbds_lasso_predict_min[[1]] - greenbuildings_test$revenue)^2 %>% mean() %>% sqrt()) %>%
+  knitr::kable(caption = "The RMSEs of Tree Models",
+               col.names = c("Random Forest", "Boosting", "KNN", "LASSO")) %>%
+  kable_styling(full_width = F)
 ```
-By using the tree model to build our predictive model, we identify the association between rental revenue and green certification. We first split the new greenbuildings data set into training and test set, then we use two different tree methods: random forest and boosted regression trees to build our model. Then we calculate the out of sample RMSE. The result shows that the RMSE of the random forest model is lower that that using boosted regression trees. Therefore, we choose to use random forest method.
+We first split the new greenbuildings data set into training and test set, then we use four different tree methods: random forest, boosted regression trees, KNN regression and LASSO regression to build our model. Table \@ref(tab:tab1) shows that random forest model is the best predictive model given out-of-sample accuracy. Therefore, we choose random forest model to identify the association between rental revenue and green certification.
 
-#### Results
+## Results
 
-```{r echo=FALSE, message=FALSE, warning=FALSE, alert=FALSE}
+```{r fig2, fig.align='center', fig.cap="Figure of All Features Descending by Importance", echo=FALSE, warning=FALSE, message=FALSE}
 varImpPlot(greenbuildings_rforest, type=1, main = "Importantce of Variables")
 ```
+From Figure \@ref(fig:fig2), we found that the most important features that landlords should consider are `size`, `stories`, `age`. These variables contribute the most to the model. However, `green_rating` seems not very important.
 
-**Figure 1:** Figure of all features descending by importance
-
-From Figure 1, we found that the most important features that landlords should consider are "size, stories, age", these variables seems to be the most important. However, the "green_rating" variable is not that important from our observation.
-
-```{r echo=FALSE, message=FALSE, warning=FALSE, alert=FALSE}
+```{r fig3, fig.align='center', fig.cap="Impact of Green Certifications on Revenue", echo=FALSE, warning=FALSE, message=FALSE}
+placehd_0 = greenbuildings_new %>%
+  group_by(green_rating) %>%
+  summarise(avg_rev = mean(revenue))
 ggplot(data=greenbuildings_new) +
   geom_boxplot(mapping=aes(x=factor(green_rating), y=revenue))+
-  ylim(c(0, 50))+
   xlab("Green Certification")+
   ylab("Revenue per square foot")
 ```
+Figure \@ref(fig:fig3) includes the information between revenue and green_rating, the average revenue per square foot is around $2693.526$ for buildings with a green certification, and around $2378.839$ for those without a certification. This shows that buildings with green certification get more revenue than those without green certification, but the impact is small.
 
-**Figure 2:** Impact of Green Certifications on Revenue
-
-The box plot includes the information between revenue and green_rating, the average revenue per square foot is around 20 for buildings with a green certification, and around 24 for those without a certification. Therefore, we didn't find significant difference between buildings with or without green certification.
-
-```{r echo=FALSE, message=FALSE, warning=FALSE, alert=FALSE}
-greenbuildings_test = mutate(greenbuildings_test, predict_rent = predict(greenbuildings_rforest,greenbuildings_test))
-
-gmean = greenbuildings_test %>%
-  group_by(green_rating) %>%
-  summarize(mean(predict_rent))
-gmean
-```
-
-**Table 1:** The average change in revenue per square foot related to green certification
-
-We then calculate the average change in revenue per square foot for buildings with or without green certification. From the table above, we found that buildings with green certification get more revenue than those without green certification, but the impact is small, considering the difference is about 2 unit.
-
-```{r echo=FALSE, message=FALSE, warning=FALSE, alert=FALSE}
-partialPlot(greenbuildings_rforest, greenbuildings_test, 'green_rating', 
+```{r fig4, fig.align='center', fig.cap="Partial Effect of Green Certifications on Revenue", echo=FALSE, warning=FALSE, message=FALSE}
+greenbuildings_rforest2 = randomForest(revenue ~ ., data = greenbuildings_new)
+placehd_1 = partial(greenbuildings_rforest2, pred.var = 'green_rating')[2,2] -
+  partial(greenbuildings_rforest2, pred.var = 'green_rating')[1,2]
+partialPlot(greenbuildings_rforest2, greenbuildings_new, 'green_rating', 
             xlab = "Green Certification",
             ylab = "Revenue per square foot",
             main = "The Partial Effect of Green Certifications on Revenue")
 ```
 
-**Figure 3:** Partial Effect of Green Certifications on Revenue
+From \@ref(fig:fig4), we found a positive association between revenue and green certification, which means green certification is expected to increase revenue per square foot per year by $65.37967$ on average holding all else fixed.
 
-From the partial effect figure of green certification on revenue per square foot, we found a positive association between revenue and green certification, which means green certification has some good impact on revenue. 
+## Conclusion
 
-#### Conclusion
+From our analysis, we build a random forest model to estimate the association between green certification and revenue per square foot per year. By our results, we found that green certification has slightly positive impact on revenue. More specifically, green certification is associated with a $65.37967\$$ increase in revenue per square foot per year holding all else fixed. In addition, we found that `size`, `age`, `stories` have more impacts on revenue. Based on our research, the landlords should weigh the pros and cons of getting a green certification, thinking critically about the cost and revenue change of getting a green certification. If they think that the benefit doesn't overweight the cost of getting a certification, they should focus on other features, which have more important impact on revenue.
 
-From our analysis, we build the model using random forest to estimate the association between green certification and revenue per square foot per year. From our results, we found that green certification has some positive impact on revenue, but the impact isn't very significant. In addition, we found that these variables "size, age, stories" have more impact on revenue. Based on our research, the landlords should weigh the pros and cons of getting a green certification, thinking critically about the cost and revenue change of getting a green certification. If they figure that the income change doesn't overweigh the cost of getting a certification, they should focus on other features, which have more important impact on revenue.
+# Predictive model building: California housing
 
-### Problem 4: Predictive model building: California housing
-
-Our purpose is to build the best predictive model to forecast the median house value in California. According to the topic description, in the beginning, we have to conduct standardized processing for "totalRooms" and  totalBedrooms" by creating the new variables including "sdrooms" and "sdbedrooms". Then we utilized three different methods including Step wise, Random Forecast and boost, to build the best predictive model. 
+Our purpose is to build the best predictive model to forecast the median house value in California. According to exercise description, in the beginning we have to conduct standardized processing for `totalRooms` and  `totalBedrooms` by creating the new variables including `sdrooms` and `sdbedrooms`. Then we utilized linear regression (with stepwise variable selection) and tree models to build the best predictive model. 
 
 
 ```{r warning=FALSE, echo=FALSE, message=FALSE, alert=FALSE, include=FALSE}
@@ -303,42 +303,21 @@ cahousing_boost = gbm(medianHouseValue ~ longitude + latitude + housingMedianAge
 cahousing_boost
 ```
 
-Now, we estimate their RMSE to find out which model is our best predictive model.
+Now, we list their RMSEs to find out which model is the best predictive model.
 
-```{r warning=FALSE, echo=FALSE, message=FALSE, alert=FALSE, include=FALSE}
-rmse(lm_medium, cahousing_test)
-rmse(lm_step, cahousing_test)
-rmse(cahousing_tree, cahousing_test)
-rmse(cahousing_forest, cahousing_test)
-rmse(cahousing_boost, cahousing_test)
-
-
+```{r tab2, warning=FALSE, echo=FALSE, message=FALSE, alert=FALSE}
 cbind(modelr::rmse(lm_medium, cahousing_test), 
       modelr::rmse(lm_step, cahousing_test),
       modelr::rmse(cahousing_tree, cahousing_test),
       modelr::rmse(cahousing_forest, cahousing_test),
       modelr::rmse(cahousing_boost, cahousing_test)) %>%
   knitr::kable(caption = "The RMSEs of Models",
-               col.names = c("lm_medium", "lm_step", "dengue_boost", "cahousing_forest", "cahousing_boost")) %>%
+               col.names = c("OLS", "Stepwise", "CART", "Random Forest", "Boosting"))%>%
   kable_styling(full_width = F)
 ```
+Table \@ref(tab:tab2) shows that the random forest model has the lowest RMSE, so we employ it to build our best predictive model.
 
-
-```{r warning=FALSE, echo=FALSE, message=FALSE, alert=FALSE}
-
-cbind(modelr::rmse(lm_medium, cahousing_test), 
-      modelr::rmse(lm_step, cahousing_test),
-      modelr::rmse(cahousing_tree, cahousing_test),
-      modelr::rmse(cahousing_forest, cahousing_test),
-      modelr::rmse(cahousing_boost, cahousing_test)) %>%
-  knitr::kable(caption = "The RMSEs of Models",
-               col.names = c("lm_medium", "lm_step", "dengue_boost", "cahousing_forest", "cahousing_boost")) %>%
-  kable_styling(full_width = F)
-```
-
-According to our results, we can find the Random Forecast model has lower RMSE, so we use this to build our best predictive model.
-
-```{r warning=FALSE, echo=FALSE, message=FALSE, alert=FALSE}
+```{r fig5, fig.align='center', fig.cap="Actual Median House Values in California", echo=FALSE, warning=FALSE, message=FALSE}
 y_hat = predict(cahousing_forest,cahousing)
 
 cahousing = mutate(cahousing,
@@ -346,7 +325,7 @@ cahousing = mutate(cahousing,
                    residuals = abs(medianHouseValue-y_hat))
 
 register_google(key='AIzaSyCxfaeZOsiy02DxnEYVMPW4mIuRyz3hIes')
-
+options(scipen=10000)
 medianhouse = qmplot(x = longitude, 
               y = latitude, 
               data = cahousing, 
@@ -356,10 +335,11 @@ medianhouse = qmplot(x = longitude,
               extent = "panel",
               darken=0.2,
               alpha = 0.1) +
-  scale_alpha(guide = 'none')+
-  labs(title="Figure 4-1: Actual Median House Value in California")
+    scale_alpha(guide = 'none')+
+  scale_colour_gradient("Actual\nHouse\nValue", high="red",low='green') 
 medianhouse
-
+```
+```{r fig6, fig.align='center', fig.cap="Predicted Values in California", echo=FALSE, warning=FALSE, message=FALSE}
 #prdiction graph
 predictvalue = qmplot(x = longitude, 
               y = latitude, 
@@ -370,10 +350,11 @@ predictvalue = qmplot(x = longitude,
               maptype = "watercolor",
               darken=0.2,
               alpha = 0.1) +
-  scale_alpha(guide = 'none')+
-  labs(title="Figure 4-2: Prediction Value in California")
+    scale_alpha(guide = 'none')+
+  scale_colour_gradient("Predicted\nHouse\nValue", high="red",low='green')
 predictvalue
-
+```
+```{r fig7, fig.align='center', fig.cap="Model's Errors", echo=FALSE, warning=FALSE, message=FALSE}
 #residual graph
 modelerror = qmplot(x = longitude, 
               y = latitude, 
@@ -384,9 +365,9 @@ modelerror = qmplot(x = longitude,
               maptype = "watercolor",
               darken=0.2,
               alpha = 0.1) +
-  labs(title="Figure 4-3: Model's error")+
-  scale_alpha(guide = 'none')
+  scale_alpha(guide = 'none')+
+  scale_colour_gradient("Residuals", high="red",low='green')
 modelerror
 ```
 
-We can find that above graphs are perform well, because Figure1: Actual Median House Value in California are almost match with Figure 4-2: Prediction Value in California. Therefore, we can indicate the random forest is the best predictive model in this case. In conclusion, our predictive model is effective, then we may use this predictive model to forecast other states or area in United State.
+We can find that above graphs perform well, because \@ref(fig:fig5) almost match \@ref(fig:fig6). Therefore, we can confirm that the random forest model does well in the prediction. In conclusion, our predictive model is effective, then we may use this predictive model to forecast other states or areas in United State.

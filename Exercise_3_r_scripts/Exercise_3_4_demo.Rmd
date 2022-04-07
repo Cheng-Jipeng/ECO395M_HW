@@ -1,0 +1,132 @@
+---
+title: "Exercise 3"
+author: "Yuting Huang, Jipeng Cheng, Weidi Hou"
+date: "4/5/2022"
+output: bookdown::html_document2
+---
+
+```{r setup, include=FALSE, cache=TRUE}
+knitr::opts_chunk$set(echo=FALSE)
+```
+
+# Problem 4: Predictive model building: California housing
+
+Our purpose is to build the best predictive model to forecast the median house value in California. According to exercise description, in the beginning we have to conduct standardized processing for `totalRooms` and  `totalBedrooms` by creating the new variables including `sdrooms` and `sdbedrooms`. Then we utilized linear regression (with stepwise variable selection) and tree models to build the best predictive model. 
+
+
+```{r warning=FALSE, echo=FALSE, message=FALSE, alert=FALSE, include=FALSE}
+library(tidyverse)
+library(randomForest)
+library(mosaic)
+library(foreach)
+library(rpart)
+library(modelr)
+library(gbm)
+library(pdp)
+library(rsample)
+library(ggplot2)
+library(scales)
+library(ggmap)
+library(lubridate)
+library(randomForest)
+library(kableExtra)
+
+cahousing = read.csv("https://raw.githubusercontent.com/Cheng-Jipeng/ECO395M/master/data/CAhousing.csv")
+
+head(cahousing)
+
+cahousing = mutate(cahousing,
+                 sdrooms=totalRooms/households,
+                 sdbedrooms=totalBedrooms/households,
+                 totalRooms=NULL,totalBedrooms=NULL)
+
+cahousing_split = initial_split(cahousing, prop = 0.7)
+cahousing_train = training(cahousing_split)
+cahousing_test = testing(cahousing_split)
+
+lm_medium = lm(medianHouseValue ~ longitude + latitude + housingMedianAge + sdrooms + sdbedrooms + population + medianIncome, data=cahousing_train)
+lm_medium
+
+#Choose a model by AIC in a Stepwise Algorithm
+lm_step = step(lm_medium, 
+                scope=~(.)^2)
+lm_step
+
+cahousing_tree = rpart(medianHouseValue ~ longitude + latitude + housingMedianAge + sdrooms + sdbedrooms + population + medianIncome, data=cahousing_train, control = rpart.control(cp = 0.00001))
+cahousing_tree
+
+cahousing_forest = randomForest(medianHouseValue ~ longitude + latitude + housingMedianAge + sdrooms + sdbedrooms + population + medianIncome, data=cahousing_train, importance=TRUE)
+cahousing_forest
+
+cahousing_boost = gbm(medianHouseValue ~ longitude + latitude + housingMedianAge + sdrooms + sdbedrooms + population + medianIncome, data=cahousing_train)
+cahousing_boost
+```
+
+Now, we list their RMSEs to find out which model is the best predictive model.
+
+```{r tab2, warning=FALSE, echo=FALSE, message=FALSE, alert=FALSE}
+cbind(modelr::rmse(lm_medium, cahousing_test), 
+      modelr::rmse(lm_step, cahousing_test),
+      modelr::rmse(cahousing_tree, cahousing_test),
+      modelr::rmse(cahousing_forest, cahousing_test),
+      modelr::rmse(cahousing_boost, cahousing_test)) %>%
+  knitr::kable(caption = "The RMSEs of Models",
+               col.names = c("OLS", "Stepwise", "CART", "Random Forest", "Boosting"))%>%
+  kable_styling(full_width = F)
+```
+Table \@ref(tab:tab2) shows that the random forest model has the lowest RMSE, so we employ it to build our best predictive model.
+
+```{r fig5, fig.align='center', fig.cap="Actual Median House Values in California", echo=FALSE, warning=FALSE, message=FALSE}
+y_hat = predict(cahousing_forest,cahousing)
+
+cahousing = mutate(cahousing,
+                   prediction = y_hat,
+                   residuals = abs(medianHouseValue-y_hat))
+
+register_google(key='AIzaSyCxfaeZOsiy02DxnEYVMPW4mIuRyz3hIes')
+options(scipen=10000)
+medianhouse = qmplot(x = longitude, 
+              y = latitude, 
+              data = cahousing, 
+              geom = "point", 
+              color = medianHouseValue,
+              maptype = "watercolor",
+              extent = "panel",
+              darken=0.2,
+              alpha = 0.1) +
+    scale_alpha(guide = 'none')+
+  scale_colour_gradient("Actual\nHouse\nValue", high="red",low='green') 
+medianhouse
+```
+```{r fig6, fig.align='center', fig.cap="Predicted Values in California", echo=FALSE, warning=FALSE, message=FALSE}
+#prdiction graph
+predictvalue = qmplot(x = longitude, 
+              y = latitude, 
+              data = cahousing, 
+              geom = "point", 
+              extent = "panel",
+              color = prediction,
+              maptype = "watercolor",
+              darken=0.2,
+              alpha = 0.1) +
+    scale_alpha(guide = 'none')+
+  scale_colour_gradient("Predicted\nHouse\nValue", high="red",low='green')
+predictvalue
+```
+```{r fig7, fig.align='center', fig.cap="Model's Errors", echo=FALSE, warning=FALSE, message=FALSE}
+#residual graph
+modelerror = qmplot(x = longitude, 
+              y = latitude, 
+              data = cahousing, 
+              geom = "point", 
+              color = residuals,
+              extent = "panel",
+              maptype = "watercolor",
+              darken=0.2,
+              alpha = 0.1) +
+  scale_alpha(guide = 'none')+
+  scale_colour_gradient("Residuals", high="red",low='green')
+modelerror
+```
+
+We can find that above graphs perform well, because \@ref(fig:fig5) almost match \@ref(fig:fig6). Therefore, we can confirm that the random forest model does well in the prediction. In conclusion, our predictive model is effective, then we may use this predictive model to forecast other states or areas in United State.
