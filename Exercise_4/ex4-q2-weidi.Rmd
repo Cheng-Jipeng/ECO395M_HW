@@ -1,0 +1,55 @@
+---
+title: "ex4-q2"
+author: "weidi hou"
+date: "4/29/2022"
+output: html_document
+---
+
+## Question 2: Market segmentationent
+
+In this questions, our task is to design a model in order to help seperate people into different market segments. As we all know, as the entrepreneur, they always care about whether they can get in touch with their target customers, and post their advertisement to people who really care about their products. correctly reaching out their target customers paves an important way for these entrepreneur to make efficient decision and therefore makes more money. In order to give our client some insight as to how they might position their brand to maximally appeal to each market segment, we use the PCA (principle component analysis) method to give a incise look after analysising the data. 
+
+### Upload data 
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+## Now the data of social marketing
+social_marketing=read.csv("/Users/macbookpro/Desktop/social_marketing.csv", row.names=1)
+## head(social_marketing)
+```
+
+## PCA method
+
+From the statement in question 2, we decide to delate category " chatter", since a lot of annotators may used the "chatter" category to capture posts that don't fit at all into any of the listed interest categories. Also, we will delate category " spam", "adult" and "uncategorized" when we use the PCA method.
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+PCA=prcomp(social_marketing-social_marketing$chatter-social_marketing$uncategorized-social_marketing$spam-social_marketing$adult, scale=TRUE)
+PVE=PCA$sdev^2/sum(PCA$sdev^2)
+plot(PVE, type="o",ylab="PVE", xlab="Principal Component", main="Figure 2.1 PVE (Scree Plot)")
+plot(cumsum(PVE), type="o", ylab="Cumulative PVE", xlab="Principal Component", main="Figure 2.2. Cumulative PVE", col="red")
+summary(PCA)
+```
+From Figure 2.2 Cumulative PVE and the summury result, we found that the first eight principle components can explain more than 95% variance of the data, therefore, we decide to choose eight principle components to analysis data. In addition, form Cumulative PVE, we found that after about ten principle components, the curve incline to be flat, which means after first ten principle components, extra components can't help to explain more variance.
+
+## Result analysis
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+round(PCA$rotation[,1:8],2)
+```
+
+From the results, we can't find large difference in the first principle components. But in the fourth principle components, we found that categories "cooking", "photo_sharing", "fashion",  have higher values. Based on these characteristics, we think they may be urben with-collar worker, since these are all their interested topics. Then from the fifth principle components, we found that  "college_uni","online gaming", "health_nutrition", they may be college students since these are all their cared topics. In addition, from PC6, "plitics", "travel", "college_uni"have the highest values, we guess they are the middle-aged, since these people like talk about plitics and they have enough money and extra time to travel, also they care about their the education condition of their kids. Then from PC7, categories "tv_film" and "art" have higher values, so they maybe artists. Finally from PC8, "photo sharing" and "shopping" have higher values, we believe they maybe young female since it fits the characteristics of this group of people.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
