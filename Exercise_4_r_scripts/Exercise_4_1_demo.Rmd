@@ -8,7 +8,7 @@ output: bookdown::html_document2
 ```{r setup, include=FALSE, cache=TRUE}
 knitr::opts_chunk$set(echo=FALSE)
 ```
-# Q1: Clustering and PCA
+# Clustering and PCA
 ## Clustering
 ### Color of wines
 ```{r fig1, fig.align='center', fig.cap="Value of features for wines of different colors", warning=FALSE, echo=FALSE, message=FALSE, alert=FALSE}
@@ -267,51 +267,3 @@ ggplot(wine_results) +
 ```
 
 
-# Q3: Association rules for grocery purchases
-
-```{r, include=FALSE,message=FALSE,warning=FALSE}
-library(tidyverse)
-library(arules) # has a big ecosystem of packages built around it.
-library(arulesViz)
-library(igraph)
-
-groceries = read.csv("https://raw.githubusercontent.com/Cheng-Jipeng/ECO395M/master/data/groceries.txt",header = FALSE)
-
-groceries$buyer = seq.int(nrow(groceries))
-groceries = cbind(groceries[,5], stack(lapply(groceries[,1:4], as.character)))[1:2]
-colnames(groceries) = c("buyer","item")
-groceries = groceries[order(groceries$buyer),]
-groceries = groceries[!(groceries$item==""),]
-row.names(groceries) = 1:nrow(groceries)
-groceries$buyer = factor(groceries$buyer)
-```
-
-In order to obtain the association rules for grocery purchases, here we used the calculation of the Apriori method with the conditions of support=0.005, confidence=0.1 and maxlen=2.
-
-```{r, include=FALSE,message=FALSE,warning=FALSE}
-groceries = split(x=groceries$item, f=groceries$buyer)
-groceries = lapply(groceries, unique)
-grotrans = as(groceries, "transactions")
-goodrules = apriori(grotrans, 
-                    parameter=list(support=.005, confidence=.1, maxlen=2))
-inspect(goodrules)
-inspect(subset(goodrules, lift > 10 & confidence > 0.05))
-```
-
-```{r,echo=FALSE,message=FALSE,warning=FALSE}
-plot(goodrules, measure = c("support", "lift"), shading = "confidence")
-```
-
-However, it is hard to find the association rules because of so many rules in above plot. Therefore, we would like to use the subset data to make the graph clearly.
-
-```{r, include=FALSE,message=FALSE,warning=FALSE}
-sub1 = subset(goodrules, subset=confidence > 0.01 & support > 0.005)
-```
-
-We selected the association rules to form a subset with confidence \> 0.01, support \> 0.005 and 45 rules.
-
-```{r,echo=FALSE,message=FALSE,warning=FALSE}
-plot(head(sub1, 45, by='lift'), method='graph')
-```
-
-Finally, the graph looks more interesting, reasonable and meaningful. For instance, whipped/sour cream, cream, cheese, and butter point to yogurt, which are possible because they belongs to dairy product. In addition, meat, fruit and vegetables close to other vegetables.
