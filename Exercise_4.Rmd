@@ -270,7 +270,7 @@ ggplot(wine_results) +
 
 In this questions, our task is to design a model in order to help separate people into different market segments. As we all know, sellers always care about whether they can get in touch with their target customers, and post their advertisement to people who really care about their products. correctly reaching out their target customers paves an important way for them to make decision efficiently and therefore makes more money. In order to give our client some insight as to how they might position their brand to maximally appeal to each market segment, we use the PCA (principle component analysis) method to give a incise look after analyzing the data. 
 
-### Upload data 
+## Upload data 
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 ## Now the data of social marketing
