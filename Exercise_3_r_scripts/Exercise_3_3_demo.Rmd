@@ -1,0 +1,163 @@
+---
+title: "Exercise 3"
+author: "Yuting Huang, Jipeng Cheng, Weidi Hou"
+date: "4/5/2022"
+output: bookdown::html_document2
+---
+
+```{r setup, include=FALSE, cache=TRUE}
+knitr::opts_chunk$set(echo=FALSE)
+```
+
+# Predictive model building: green certification
+```{r echo=FALSE, message=FALSE, warning=FALSE, alert=FALSE}
+library(tidyverse)
+library(ggplot2)
+library(rpart)
+library(rpart.plot)
+library(rsample) 
+library(randomForest)
+library(lubridate)
+library(modelr)
+library(gbm)
+library(pdp)
+library(caret)
+library(gamlr)
+library(kableExtra)
+```
+
+## Overview
+
+As landlords or renters, what they mostly care about is their possible revenue per square foot per calendar year. As we all know, leasing revenue depends on many factors, such as the building age, facilities, amenities, building size and so on. Nowadays, people pay more attention to their living environment when renting a house, such as whether the landlord has a green certification. Therefore, it's meaningful to do some research on the relationship between rental income and green certification.
+
+In our report, we build possibly the best predictive model for revenue per square foot per calendar year and to use this model to quantify the average change in rental income per square foot associated with green certification, holding other features of the building constant.
+
+## Data and research design
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, alert=FALSE}
+greenbuildings = read.csv("https://raw.githubusercontent.com/Cheng-Jipeng/ECO395M/master/data/greenbuildings.csv")
+
+greenbuildings_new = greenbuildings %>% 
+  mutate(revenue = Rent * leasing_rate) %>%
+  select(-c(CS_PropertyID, Rent, leasing_rate, LEED, Energystar)) %>%
+  na.omit()
+greenbuildings_new$green_rating = factor(greenbuildings_new$green_rating)
+```
+
+### Data
+
+In our raw data set, there are 7,820 data points. We first filter out the missing data. Now, our new `greenbuildings` data set has 7820 observations. 
+
+### Predictive variable and features
+
+The predictive variable is revenue per square foot per year, which is the product of two terms: rent and leasing_rate. 
+
+The features used to build our model are: 
+    
+    (1) cluster: an identifier for the building cluster, with each cluster containing one green-certified building and at least one other non-green-certified building within a quarter-mile radius of the cluster center.
+    
+    (2) size: the total square footage of available rental space in the building.
+    
+    (3) empl.gr: the year-on-year growth rate in employment in the building's geographic region.
+    
+    (4) stories: the height of the building in stories.
+    
+    (5) age: the age of the building in years.
+    
+    (6) renovated: whether the building has undergone substantial renovations during its lifetime.
+    
+    (7) (8) class.a, class.b: indicators for two classes of building quality (the third is Class C). These are relative classifications within a specific market. Class A buildings are generally the highest-quality properties in a given market. Class B buildings are a notch down, but still of reasonable quality. Class C buildings are the least desirable properties in a given market.
+    
+    (9) green.rating: an indicator for whether the building is either LEED- or EnergyStar-certified.
+    
+    (10) net: an indicator as to whether the rent is quoted on a "net contract" basis. Tenants with net-rental contracts pay their own utility costs, which are otherwise included in the quoted rental price.
+    
+    (11) amenities: an indicator of whether at least one of the following amenities is available on-site: bank, convenience store, dry cleaner, restaurant, retail shops, fitness center.
+   
+    (12) cd.total.07: number of cooling degree days in the building's region in 2007. A degree day is a measure of demand for energy; higher values mean greater demand. Cooling degree days are measured relative to a baseline outdoor temperature, below which a building needs no cooling.
+    
+    (13) hd.total07: number of heating degree days in the building's region in 2007. Heating degree days are also measured relative to a baseline outdoor temperature, above which a building needs no heating.
+    
+    (14) total.dd.07: the total number of degree days (either heating or cooling) in the building's region in 2007.
+    
+    (15) Precipitation: annual precipitation in inches in the building's geographic region.
+    
+    (16) Gas.Costs: a measure of how much natural gas costs in the building's geographic region.
+   
+    (17) Electricity.Costs: a measure of how much electricity costs in the building's geographic region.
+    
+    (18) City_Market_Rent: a measure of average rent per square-foot per calendar year in the building's local market.
+
+## Research design
+
+```{r tab1, echo=FALSE, message=FALSE, warning=FALSE, alert=FALSE}
+greenbuildings_split =  initial_split(greenbuildings_new, prop=0.8)
+greenbuildings_train = training(greenbuildings_split)
+greenbuildings_test  = testing(greenbuildings_split)
+
+# Random forests
+greenbuildings_rforest = randomForest(revenue ~ ., data = greenbuildings_train, importance = TRUE)
+
+# Boosting 
+boost1 = gbm(revenue ~ ., data = greenbuildings_train, interaction.depth=4, n.trees=350, shrinkage=.05, distribution="gaussian")
+
+# KNN
+grbds_knn = train(revenue ~ ., data = greenbuildings_train, method="knn",
+                  trControl=trainControl(method="cv",number=5),
+                  preProc = c("center", "scale"))
+grbds_knn_pred = predict(grbds_knn, newdata = greenbuildings_test)
+
+
+# LASSO
+grbds_lasso_X = model.matrix(revenue ~ .-1, data=greenbuildings_train)
+grbds_lasso_Y = greenbuildings_train$revenue
+grbds_lasso = cv.gamlr(grbds_lasso_X, grbds_lasso_Y, scale=TRUE, nfold=5)
+grbds_lasso_X_val = model.matrix(revenue ~ .-1, data = greenbuildings_test)
+grbds_lasso_predict_min = predict(grbds_lasso, grbds_lasso_X_val, select="min") %>%
+  as.matrix() %>% as.data.frame() 
+grbds_lasso_Y_test = greenbuildings_test$revenue %>% as.data.frame()
+
+# compare RMSE on the test set #
+cbind(modelr::rmse(greenbuildings_rforest, greenbuildings_test), 
+      rmse(boost1, greenbuildings_test),
+      (grbds_knn_pred-greenbuildings_test$revenue)^2 %>% mean() %>% sqrt(),
+      (grbds_lasso_predict_min[[1]] - greenbuildings_test$revenue)^2 %>% mean() %>% sqrt()) %>%
+  knitr::kable(caption = "The RMSEs of Tree Models",
+               col.names = c("Random Forest", "Boosting", "KNN", "LASSO")) %>%
+  kable_styling(full_width = F)
+```
+We first split the new greenbuildings data set into training and test set, then we use four different tree methods: random forest, boosted regression trees, KNN regression and LASSO regression to build our model. Table \@ref(tab:tab1) shows that random forest model is the best predictive model given out-of-sample accuracy. Therefore, we choose random forest model to identify the association between rental revenue and green certification.
+
+## Results
+
+```{r fig2, fig.align='center', fig.cap="Figure of All Features Descending by Importance", echo=FALSE, warning=FALSE, message=FALSE}
+varImpPlot(greenbuildings_rforest, type=1, main = "Importantce of Variables")
+```
+From Figure \@ref(fig:fig2), we found that the most important features that landlords should consider are `size`, `stories`, `age`. These variables contribute the most to the model. However, `green_rating` seems not very important.
+
+```{r fig3, fig.align='center', fig.cap="Impact of Green Certifications on Revenue", echo=FALSE, warning=FALSE, message=FALSE}
+placehd_0 = greenbuildings_new %>%
+  group_by(green_rating) %>%
+  summarise(avg_rev = mean(revenue))
+ggplot(data=greenbuildings_new) +
+  geom_boxplot(mapping=aes(x=factor(green_rating), y=revenue))+
+  xlab("Green Certification")+
+  ylab("Revenue per square foot")
+```
+Figure \@ref(fig:fig3) includes the information between revenue and green_rating, the average revenue per square foot is around $2693.526$ for buildings with a green certification, and around $2378.839$ for those without a certification. This shows that buildings with green certification get more revenue than those without green certification, but the impact is small.
+
+```{r fig4, fig.align='center', fig.cap="Partial Effect of Green Certifications on Revenue", echo=FALSE, warning=FALSE, message=FALSE}
+greenbuildings_rforest2 = randomForest(revenue ~ ., data = greenbuildings_new)
+placehd_1 = partial(greenbuildings_rforest2, pred.var = 'green_rating')[2,2] -
+  partial(greenbuildings_rforest2, pred.var = 'green_rating')[1,2]
+partialPlot(greenbuildings_rforest2, greenbuildings_new, 'green_rating', 
+            xlab = "Green Certification",
+            ylab = "Revenue per square foot",
+            main = "The Partial Effect of Green Certifications on Revenue")
+```
+
+From \@ref(fig:fig4), we found a positive association between revenue and green certification, which means green certification is expected to increase revenue per square foot per year by $65.37967$ on average holding all else fixed.
+
+## Conclusion
+
+From our analysis, we build a random forest model to estimate the association between green certification and revenue per square foot per year. By our results, we found that green certification has slightly positive impact on revenue. More specifically, green certification is associated with a $65.37967\$$ increase in revenue per square foot per year holding all else fixed. In addition, we found that `size`, `age`, `stories` have more impacts on revenue. Based on our research, the landlords should weigh the pros and cons of getting a green certification, thinking critically about the cost and revenue change of getting a green certification. If they think that the benefit doesn't overweight the cost of getting a certification, they should focus on other features, which have more important impact on revenue.
