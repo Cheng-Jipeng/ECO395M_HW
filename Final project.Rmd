@@ -1,0 +1,32 @@
+---
+title: "Final porject_title"
+author: "Yuting Huang, Jipeng Cheng, Weidi Hou"
+date: "5/1/2022"
+output: bookdown::html_document2
+---
+
+## Abstract
+summarize your question, your methods, your results, and your main conclusions in a few hundred words or less.
+
+## Introduction
+Introduce the question you’re trying to answer at a reason- able level of detail. Give background and motivation for why it’s important.
+
+## Methods
+Describe your data set and the methods you will use to ana- lyze it.
+
+## Results
+Tables, figures, and text that illustrate your findings. Keep the focus on the numbers here. You will interpret your results in the next section.
+
+## Conclusion
+Interpret what you found. What are the main lessons we should take away from your report?
+
+## Appendix
+optional. Any details (like extra figures, etc) that didn’t fit in well with the main report, but that you think are important.
+
+The main body of your report (excluding the appendix) should prob- ably have no more than about 4-6 figures and tables. Use those to focus on the most important results. Put the rest in the appendix if you need more. Number all figures and tables and refer to them by number (Fig- ure 2, Table 3, etc) in the text where appropriate. Do not include a figure or table in the report or the appendix if you don’t discuss it in the text.
+
+1. A written project report that describes your question, your data sources, your methodological approach, and your conclusions. This should be prepared in RMarkdown format and compiled to a PDF document that you post on GitHub. Send me both the link and the PDF itself.
+2. The data set itself, in .csv format.
+3. A link to the raw .Rmd file used to analyze your data and prepare your report. If your analysis and plots are not 100% reproducible, you will not receive a passing grade.
+
+5–10 type-written pages (no more than 15 pages)
