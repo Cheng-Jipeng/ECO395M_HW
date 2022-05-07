@@ -11,15 +11,37 @@ summarize your question, your methods, your results, and your main conclusions i
 # Introduction
 Introduce the question you’re trying to answer at a reason- able level of detail. Give background and motivation for why it’s important.
 
-# Data
+# Data Description
 
-## Data description
+The original data comes from \href{https://www.kaggle.com/datasets/jmmvutu/dating-app-lovoo-user-profiles?select=lovoo_v3_users_api-results.csv}{Dating App User Profiles' stats - Lovoo v3}. The original data includes 2940 rows and 39 variables, finally, this research left 22 as valuable variables. The detail of each variable presents in the following table.
+
+Dating App User Profiles' stats - Lovoo v3
+
 |Variable   |Description|
-|:-------   |:----------|
-|Variable   |Description|
+|:---   |:----------|
+|counts_kisses   |Number of unique user accounts that "liked" (called "kiss" on the platform) this user account|
+|age   |user age|
+|counts_details   |Description|
+|counts_pictures   |Number of pictures on the user's profile|
+|counts_profileVisits  |Number of clicks on this user (to see his/her full profile) from other user accounts|
+|flirtInterests_chat   |Whether the user indicated being in search for people to chat with|
+|flirtInterests_friend   |Whether the user indicated being open to making friends|
+|flirtInterests_date  |Whether the user indicated being open to dating people|
+|isVip   |1 if the user is VIP. [It was possible to buy a VIP status with real money. This status came with benefits.]|
+|isVerified  |whether the user's account was verified through one of the methods (Facebook, phone number, ...)|
+|connectedToFacebook  |1 if connect to facebook|
+|lang_count   |Number of languages the user knows|
+|lang_fr   |whether the user knows French|
+|lang_en  |whether the user knows English|
+|lang_de   |whether the user knows German|
+|lang_it   |whether the user knows Italian|
+|lang_es   |whether the user knows Spanish|
+|lang_pt   |whether the user knows Portuguese|
+|freshman   |whether the user is freshman|
+|hasBirthday  |whether the user has birthday|
+|highlighted   |Whether the user's profile is currently highlighted (at fetch time)|
 
-
-# Methods
+# Methods (Model)
 Describe your data set and the methods you will use to analyze it.
 
 # Results
