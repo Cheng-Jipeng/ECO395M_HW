@@ -13,6 +13,7 @@ Introduce the question you’re trying to answer at a reason- able level of deta
 
 # Data
 
+## Data description
 |Variable   |Description|
 |:-------   |:----------|
 |Variable   |Description|
