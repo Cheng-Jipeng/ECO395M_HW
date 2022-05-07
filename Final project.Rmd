@@ -19,12 +19,7 @@ Introduce the question you’re trying to answer at a reason- able level of deta
 
 # Data Description
 
-The original data comes from \href{https://www.kaggle.com/datasets/jmmvutu/dating-app-lovoo-user-profiles?select=lovoo_v3_users_api-results.csv}{Dating App User Profiles' stats - Lovoo v3}. The original data includes 2940 rows and 39 variables, finally, this research left 22 as valuable variables. The detail of each variable presents in the following table.
-
--
-The dataset was gathered during spring 2015 (april, may). At that time, Lovoo was expanding in european countries (among others), while Tinder was trending both in America and in Europe.
-At that time the iOS version of the Lovoo app was in version 3.
--
+The original data comes from "Dating App User Profiles' stats - Lovoo v3" gathered during spring April and May 2015.  IOS version of the Lovoo app was in version 3 at that time. The original data includes 2940 rows and 39 variables, finally, this research left 22 as valuable variables. The detail of each variable presents in the following table.
 
 |Variable   |Description|
 |:---   |:----------|
