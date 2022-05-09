@@ -13,15 +13,16 @@ The importance and influence of dating app cannot be ignored in today's society.
 
 In this study, the data from Lovoo will be analyzed. The purpose of this research is to build the model and point out what profile can acquire more "likes" (called "kiss" on the Lovoo), as a indicator to capture the potential charisma of people. On the other hand, more "likes" means the person may get more matches and more potential encounters. The one things should be noticed is that our data only collect the sample from "female". Therefore, the results will be fitted for female rather than male.
 
-To have more meaningful explanation, this study created an new variable called "conversion rate", which can avoid the problem that the number of liked has highly correlation with the number of clicks (visit times) compared with using $counts\_kisses$ as a dependent variable. Also, this indicator can effectively explain how to obtain more like from other user by other independent variables.
+To have more meaningful explanation, this study created an new variable called "conversion rate", which can avoid the problem that the number of liked has highly correlation with the number of clicks (visit times) compared with using `counts_kisses` as a dependent variable. Also, this indicator can effectively explain how to obtain more like from other user by other independent variables.
 
 
 \centering
-$Conversion rate = \frac{counts\_kisses}{counts\_profileVisits}$ (1)
+`conversion rate` = $\frac{counts\_kisses}{counts\_profileVisits}$ (1)
 
 \flushleft
-# Data Description
+# Data and Methods
 
+## Data Processing
 The original data comes from "Dating App User Profiles' stats - Lovoo v3" gathered during spring April and May 2015.  IOS version of the Lovoo app was in version 3 at that time. The original data includes 2940 rows and 39 variables, finally, this research left 22 as valuable variables and create 1 new variable. 
 
 The details of each variable presents in the following table.
@@ -50,8 +51,8 @@ The details of each variable presents in the following table.
 |hasBirthday  |1 if the user has birthday|
 |highlighted   |1 if the user's profile is currently highlighted (at fetch time)|
 
-# Methods (Model)
-Describe your data set and the methods you will use to analyze it.
+## Model
+xxx
 
 # Results
 Tables, figures, and text that illustrate your findings. Keep the focus on the numbers here. You will interpret your results in the next section.
@@ -62,6 +63,7 @@ Interpret what you found. What are the main lessons we should take away from you
 # Appendix
 optional. Any details (like extra figures, etc) that didn’t fit in well with the main report, but that you think are important.
 
+# Reference
 1. Tinder, https://tinder.com
 2. ‘The Tinder Swindler’ Becomes First Doc To Lead Netflix’s Weekly Film Chart, https://deadline.com/2022/02/the-tinder-swindler-first-doc-lead-netflixs-weekly-film-chart-1234928573/
 3. Lovoo, https://about.lovoo.com/en/#app-features
