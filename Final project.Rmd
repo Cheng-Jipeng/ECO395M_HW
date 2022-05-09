@@ -1,7 +1,7 @@
 ---
-title: "Final porject_title"
+title: "ECO 395 Project: How to acquire more “kiss” on the Lovoo?"
 author: "Yu-Ting Huang, Jipeng Cheng, Weidi Hou"
-date: "5/1/2022"
+date: "5/8/2022"
 output:
   pdf_document: default
   html_document:
