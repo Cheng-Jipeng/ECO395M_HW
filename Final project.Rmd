@@ -1,25 +1,27 @@
 ---
-title: "ECO 395 Project: How to acquire more “kiss” on the Lovoo?"
+title: 'ECO 395 Project: How to acquire more “kiss” on the Lovoo?'
 author: "Yu-Ting Huang, Jipeng Cheng, Weidi Hou"
 date: "5/8/2022"
 output:
   pdf_document: default
   html_document:
     df_print: paged
+  word_document: default
 ---
 
 # Abstract
-summarize your question, your methods, your results, and your main conclusions in a few hundred words or less.
+
 
 # Introduction
+\flushleft
 The importance and influence of dating apps cannot be ignored in today’s society. For example, “The Tinder Swindler” is one of the most famous movies in 2022, specially, global views was 45.8 million hours in its first week of release and hit the top 10 in 92 countries in Netflix. Furthermore, the application “Tinder - Dating New People” is super popular in the US and over 55 billion matches are made. Of course, except for Tinder, there are so many dating apps such as OkCupid, bumble, and Coffee Meets Bagel to name but a few, they have different features to attract different groups.
-
+\flushleft
 In this study, the data from Lovoo will be analyzed. The purpose of this research is to build the model and point out what profile and specific factors can acquire more “likes” (called “kiss” on the Lovoo), as an indicator to capture the potential charisma of people. On the other hand, as we know that more “likes” means the person may get more matches and more potential encounters. The one thing that should be noticed is that our data only collects samples from “female”. Therefore, the results will be fitted for females rather than male.
-
-To have a more meaningful explanation, this study created a new variable called “conversion rate”, which can avoid the problem that the number of likes has highly correlation with the number of clicks (visit times) compared with using `counts_kisses` as a dependent variable. Also, this indicator can effectively explain how to obtain more likes from other users by other independent variables.
+\flushleft
+To have a more meaningful explanation, this study created a new variable called “conversion rate”, which can avoid the problem that the number of likes has highly correlation with the number of clicks (visit times) compared with using original `counts_kisses` as a dependent variable. Also, this indicator can effectively explain how to obtain more likes from other users by other independent variables.
 
 \centering
-`conversion rate` = $\frac{counts\_kisses}{counts\_profileVisits}$ (1)
+`counts_kisses` = $\frac{counts\_kisses}{counts\_profileVisits}$ (1)
 
 \flushleft
 Throughout the series of following analysis, the consequence of this project can help many young people, who would like to make friends and/or have a pair,  including our friends, classmates, and family, to have more wise strategies when using Lovoo as well as other dating app.
@@ -29,15 +31,15 @@ Throughout the series of following analysis, the consequence of this project can
 # Data and Methods
 
 ## Data Processing
+\flushleft
 The original data comes from "Dating App User Profiles' stats - Lovoo v3" gathered during spring April and May 2015.  IOS version of the Lovoo app was in version 3 at that time. The original data includes 2940 rows and 39 variables, finally, this research left 22 as valuable variables and create 1 new variable. 
-
+\flushleft
 The details of each variable presents in the following table.
 
 |Variable   |Description|
 |:---   |:----------|
-|conversion |Index for converting times of visits to times of likes, as formula (1)|
 |age   |user age|
-|counts_kisses   |Number of unique user accounts that "liked" (called "kiss" on the platform) this user account|
+|counts_kisses   |Number of unique user accounts that "liked" (called "kiss" on the platform) this user account, following formula (1), as a index for converting times of visits to times of likes|
 |counts_details   |The degree of account completion|
 |counts_pictures   |Number of pictures on the user's profile|
 |counts_profileVisits  |Number of clicks on this user (to see his/her full profile) from other user accounts|
@@ -58,16 +60,190 @@ The details of each variable presents in the following table.
 |highlighted   |1 if the user's profile is currently highlighted (at fetch time)|
 
 ## Model
-xxx
+\flushleft
+In order to analyze which feature will help app users attract more people, we decide to **Lesso regression** and **Random Forest** methods to study it. As we all know, Lasso regression as a linear regression will give us a better fitted coefficient value. Random forest method, on the other hand, will give us a better fit but it can't give us a good fitted coefficient value. In order to solve the above problems including in each method, we decide to combine these two methods in order to have a deep study on which characteristics will help app user attract more people.
 
 # Results
-Tables, figures, and text that illustrate your findings. Keep the focus on the numbers here. You will interpret your results in the next section.
+### Lesso
+```{r echo=FALSE, message=FALSE, warning=FALSE, include=FALSE}
+# read in data
+library(gamlr)
+library(tidyverse)
+lovoo_data = read.csv("~/OneDrive - The University of Texas at Austin/學習小札/2020 UTAustin/2022 Sp_Data Mining & Stat Learning/ECO395M_HW/lovoo_data.csv")
+## head(lovoo_data, 10)
+
+as.numeric(as.factor(lovoo_data$flirtInterests_chat))-1 
+lovoo_data$flirtInterests_chat = as.numeric(as.factor(lovoo_data$flirtInterests_chat))-1 
+lovoo_data$flirtInterests_date = as.numeric(as.factor(lovoo_data$flirtInterests_date))-1
+lovoo_data$flirtInterests_friends = as.numeric(as.factor(lovoo_data$flirtInterests_friends))-1
+lovoo_data$isVIP = as.numeric(as.factor(lovoo_data$isVIP))-1
+lovoo_data$isVerified = as.numeric(as.factor(lovoo_data$isVerified))-1
+lovoo_data$lang_fr = as.numeric(as.factor(lovoo_data$lang_fr))-1
+lovoo_data$lang_en = as.numeric(as.factor(lovoo_data$lang_en))-1
+lovoo_data$lang_de = as.numeric(as.factor(lovoo_data$lang_de))-1
+lovoo_data$lang_it = as.numeric(as.factor(lovoo_data$lang_it))-1
+lovoo_data$lang_es = as.numeric(as.factor(lovoo_data$lang_es))-1
+lovoo_data$lang_pt = as.numeric(as.factor(lovoo_data$lang_pt))-1
+lovoo_data$freshman = as.numeric(as.factor(lovoo_data$freshman))-1
+lovoo_data$hasBirthday = as.numeric(as.factor(lovoo_data$hasBirthday))-1
+lovoo_data$highlighted = as.numeric(as.factor(lovoo_data$highlighted))-1
+
+lovoo_data=lovoo_data[,-1]
+lovoo_data=lovoo_data[,-8]
+lovoo_data$counts_kisses=lovoo_data$counts_kisses/lovoo_data$counts_profileVisits
+lovoo_data=lovoo_data[,-3]
+lovoo_data=na.omit(lovoo_data)
+```
+\flushleft
+Lesso approach is to make some regularization so that the regularized fit minimizes the deviance plus a **penalty** on the complexity of the estimate:$minimize_{\beta\in R} dev(\beta)/n+\lambda\times pen(\lambda)$ (2). 
+
+\flushleft
+Here $\lambda$ is the penalty weight, while **pen** is some cost function that penalizes departures of the fitted $\beta$ from 0. In order to use **gamlr** function in r programming, we need to create our own numeric feature matrix.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# for gamlr, and many other fitting functions,
+# I need to create your own numeric feature matrix.
+lvx = model.matrix(counts_kisses ~ .-1, data=lovoo_data)
+lvy = lovoo_data$counts_kisses
+```
+
+
+### Cross-validation Lesso
+\flushleft
+Then we use cross-validation Lesso regression method so that the result will be more robust. 
+```{r echo=FALSE, message=FALSE, warning=FALSE, include=FALSE}
+# Now without the AIC approximation:
+# cross validated lasso (`verb` just prints progress)
+# this takes a little longer, but still so fast compared to stepwise
+
+lvcvl1 = cv.gamlr(lvx, lvy, nfold=10, standardize=FALSE,family="poisson")
+## plot(lvcvl1, bty="n")
+#lvcvl1.min = coef(lvcvl1, select="min")
+#log(lvcvl1$lambda.min)
+#sum(lvcvl1.min!=0)
+beta_hat=coef(lvcvl1)
+beta_hat
+```
+
+|Variable   |beta_hat|
+|:-----   |:----------|
+|intercept    |-3.457606879|
+|age    |0.013822836|
+|counts_pictures    |0.004166058|
+|lang_fr     |0.040604945|
+|lang_de    |-0.127865953|
+Notice that beta coefficient for the following variables including `flirtInterests_chat`, `flirtInterests_friends`, `flirtInterests_date`, `isVIP`, `isVerified`, `lang_en`, `lang_it`, `lang_es`, `lang_pt`, `countDetails`, `freshman`, `hasBirthday`, and `highlighted` are **zero**.
+
+
+\flushleft
+The result shows that the optimal $log\lambda$ which minimize the test set mean square error is -8.99 and under this level of penalty, the fitted coefficients that are not zero are `age`, `counts_pictures`, `lang_fr`, `lang_de`. From these results, we conclude that age, number of pictures on the users' profile and proficiency in French have a positive effect on being loved by more people. However, proficiency in German has a negative effect on their level of charm. These results tell us that being mature will help people attract more people and more pictures on their app profile will also help them become popular since more pictures will tell other people more information about this themselve and help other people know the user better. In addition, people who have a good looking or who are more out-going and more confident prefer to post their picture on their app profile. These type of people also attract more people. Besides, French people are more romantic and they have a higher probability to attract more people on the app. On the other hand, German people are more serious and introverted, that's why the fitted coefficient of knowing German is negative. In addition, from our regression result, we found that our feature matrix is very sparse (i.e, mostly zero), this is especially true since we have lots of factors as features. lasso regression is a great way to improve the efficiency of our model since it screens and ignores zero elements in actually storing X.
+
+### Random Forest
+\flushleft
+A random forest starts from bagging. We still take B bootstrapped samples of the original data and fit a tree to each one, and we still average the predictions of the B different trees. However, it adds more randomness. With each bootstrapped sample, we don't reach over all the features in x when we do our greedy build of a big tree. Instead, we randomly choose a subset of a features sub sample to use in building that tree. The advantages of using fewer features in each tree are that it simplifies each tree, reducing its variance and it diversifies the B trees, decorrelating their predictions.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, include=FALSE}
+## random forest
+library(tidyverse)
+library(ggplot2)
+library(rpart)
+library(rpart.plot)
+library(rsample) 
+library(randomForest)
+library(lubridate)
+library(modelr)
+library(cowplot)
+library(pdp)
+library(gridExtra)
+library(grid)
+library(lattice)
+# read in data
+lovoo_data = read.csv("~/OneDrive - The University of Texas at Austin/學習小札/2020 UTAustin/2022 Sp_Data Mining & Stat Learning/ECO395M_HW/lovoo_data.csv")
+
+as.numeric(as.factor(lovoo_data$flirtInterests_chat))-1 
+lovoo_data$flirtInterests_chat = as.numeric(as.factor(lovoo_data$flirtInterests_chat))-1 
+lovoo_data$flirtInterests_date = as.numeric(as.factor(lovoo_data$flirtInterests_date))-1
+lovoo_data$flirtInterests_friends = as.numeric(as.factor(lovoo_data$flirtInterests_friends))-1
+lovoo_data$isVIP = as.numeric(as.factor(lovoo_data$isVIP))-1
+lovoo_data$isVerified = as.numeric(as.factor(lovoo_data$isVerified))-1
+lovoo_data$lang_fr = as.numeric(as.factor(lovoo_data$lang_fr))-1
+lovoo_data$lang_en = as.numeric(as.factor(lovoo_data$lang_en))-1
+lovoo_data$lang_de = as.numeric(as.factor(lovoo_data$lang_de))-1
+lovoo_data$lang_it = as.numeric(as.factor(lovoo_data$lang_it))-1
+lovoo_data$lang_es = as.numeric(as.factor(lovoo_data$lang_es))-1
+lovoo_data$lang_pt = as.numeric(as.factor(lovoo_data$lang_pt))-1
+lovoo_data$freshman = as.numeric(as.factor(lovoo_data$freshman))-1
+lovoo_data$hasBirthday = as.numeric(as.factor(lovoo_data$hasBirthday))-1
+lovoo_data$highlighted = as.numeric(as.factor(lovoo_data$highlighted))-1
+
+lovoo_data=lovoo_data[,-1]
+lovoo_data=lovoo_data[,-8]
+lovoo_data$counts_kisses=lovoo_data$counts_kisses/lovoo_data$counts_profileVisits
+lovoo_data=lovoo_data[,-3]
+lovoo_data=na.omit(lovoo_data)
+```
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# let's split our data into training and testing
+lv_split =  initial_split(lovoo_data, prop=0.8)
+lv_train = training(lv_split)
+lv_test  = testing(lv_split)
+
+lvforest=randomForest(counts_kisses~age+counts_pictures
+                      +flirtInterests_chat+flirtInterests_friends+flirtInterests_date
+                      +isVIP+isVerified+lang_count+lang_fr+lang_en+lang_de+lang_es
+                      +lang_pt+countDetails+freshman+hasBirthday+highlighted,
+                      data=lv_train,inportance=TRUE)
+# shows out-of-bag MSE as a function of the number of trees used
+#plot(lvforest)
+```
+\flushleft
+From the load.forest plot, we found that more trees shows smaller out-off sample MSE. After 500 tress, the partial decresing of MSE becomes very small.
+\flushleft
+Then we study how random forests can give us a variable importance measure.
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# variable importance measures
+# how much does mean-squared error increase when we ignore a variable?
+vi = varImpPlot(lvforest)
+```
+\flushleft
+The x axis represents that percentage increase in mean square error and the y axis represents different variables. The variable importance plots shows how much omitting each of these variables inflates the MSE of the prediction, higher is worse. From our result plot, we found that `counts_Details`, `counts_pictures`, `age`, `freshman`, `lang_fr` and `lang_de` have higher value, which means these variables are more important in this model, they have higher influence on whether an app user will attract more people. This result is rational since completed information on their profile and more pictures on users' profile will provide more information of the user. In addition, users' basic information such as their age and whether they are new user will also provide some information their background and their communication proficiency, which are also key factors decide whether they can attract more people. Finally, people's language will tell us where they come from. People from different country may have different characteristics and their social development environment will also impact their probability of attracting more people.
+\flushleft
+Then we study the partial importance of each variable which we observe are more important in our variable importance plots. 
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# partial dependence plots
+# these are trying to isolate the partial effect of specific features
+# on the outcome
+attach(mtcars) # 固定数据集
+par(mfrow=c(2,3)) # 2行3列的画布，按行排列
+partialPlot(lvforest, lv_test, 'age', las=1)
+partialPlot(lvforest, lv_test, 'counts_pictures', las=1)
+## partialPlot(lvforest, lv_test, 'flirtInterests_chat')
+##partialPlot(lvforest, lv_test, 'flirtInterests_friends', las=1)
+##partialPlot(lvforest, lv_test, 'flirtInterests_date', las=1)
+##partialPlot(lvforest, lv_test, 'isVIP', las=1)
+##partialPlot(lvforest, lv_test, 'isVerified', las=1)
+##partialPlot(lvforest, lv_test, 'lang_count', las=1)
+partialPlot(lvforest, lv_test, 'lang_fr', las=1)
+##partialPlot(lvforest, lv_test, 'lang_en', las=1)
+partialPlot(lvforest, lv_test, 'lang_de', las=1)
+##partialPlot(lvforest, lv_test, 'lang_it', las=1)
+##partialPlot(lvforest, lv_test, 'lang_es', las=1)
+##partialPlot(lvforest, lv_test, 'lang_pt', las=1)
+partialPlot(lvforest, lv_test, 'countDetails', las=1)
+partialPlot(lvforest, lv_test, 'freshman', las=1)
+##partialPlot(lvforest, lv_test, 'hasBirthday', las=1)
+##partialPlot(lvforest, lv_test, 'highlighted', las=1)
+```
+\flushleft
+First, from the PD on `age`, we found that when people above 20 years old, they are more likely to attract people, especially when people are above 25 years old, the slope of `age` is much higher. It's reasonable since age 20-26 is a period of dating and getting marriage so people during this age are more likely to log onto this app to find their dating mate. Second, from PD on `counts_pictures` and on `counts_Details` the result is rational since  more pictures and more completed profile will tell people more stories about the user which have a positive effect on attracting more people. Third, from language perspective, people speaking French are more likely to attract people but people speaking German are less likely to attract people, since people's characteristic are influenced by their nationality and their growing up environment. Finally, from the PD of the `freshman`, it seems that new user are more attractive, since people always like new things. 
+
 
 # Conclusion
-Interpret what you found. What are the main lessons we should take away from your report?
+As female user, in order to attract more people, they need to include more details in their profile and also post more pictures. These behaviors will provide more information about themselves. In addition, mature female seems to attract more people and new users seem to be more attractive. 
 
 # Appendix
-optional. Any details (like extra figures, etc) that didn’t fit in well with the main report, but that you think are important.
 
 # Reference
 1. Tinder, https://tinder.com
@@ -76,10 +252,4 @@ optional. Any details (like extra figures, etc) that didn’t fit in well with t
 
 
 
-The main body of your report (excluding the appendix) should prob- ably have no more than about 4-6 figures and tables. Use those to focus on the most important results. Put the rest in the appendix if you need more. Number all figures and tables and refer to them by number (Fig- ure 2, Table 3, etc) in the text where appropriate. Do not include a figure or table in the report or the appendix if you don’t discuss it in the text.
 
-1. A written project report that describes your question, your data sources, your methodological approach, and your conclusions. This should be prepared in RMarkdown format and compiled to a PDF document that you post on GitHub. Send me both the link and the PDF itself.
-2. The data set itself, in .csv format.
-3. A link to the raw .Rmd file used to analyze your data and prepare your report. If your analysis and plots are not 100% reproducible, you will not receive a passing grade.
-
-5–10 type-written pages (no more than 15 pages)
