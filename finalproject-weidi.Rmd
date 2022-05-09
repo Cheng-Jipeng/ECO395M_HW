@@ -1,0 +1,168 @@
+---
+title: "finalproject_pt2"
+author: "weidi hou"
+date: "5/8/2022"
+output: html_document
+---
+
+In order to analyze which feature will help app users attracts more people, we decide to Lesso regression and Random Forest methods to study it. As we all know, Lasso regression as a linear regression will give us a better fitted coefficient value. Random forest method, on the other hand, will give us a better fit but it can't give us a good fitted coefficient value. In order to solve the above problems including in each method, we decide to combine these two methods in order to have a deep study on which characteristics will help app user attract more people.
+
+#Lesso
+## upload data
+```{r echo=FALSE, message=FALSE, warning=FALSE, include=FALSE}
+# read in data
+library(gamlr)
+library(tidyverse)
+lovoo_data = read.csv("/Users/macbookpro/Desktop/lovoo_data.csv")
+## head(lovoo_data, 10)
+
+as.numeric(as.factor(lovoo_data$flirtInterests_chat))-1 
+lovoo_data$flirtInterests_chat = as.numeric(as.factor(lovoo_data$flirtInterests_chat))-1 
+lovoo_data$flirtInterests_date = as.numeric(as.factor(lovoo_data$flirtInterests_date))-1
+lovoo_data$flirtInterests_friends = as.numeric(as.factor(lovoo_data$flirtInterests_friends))-1
+lovoo_data$isVIP = as.numeric(as.factor(lovoo_data$isVIP))-1
+lovoo_data$isVerified = as.numeric(as.factor(lovoo_data$isVerified))-1
+lovoo_data$lang_fr = as.numeric(as.factor(lovoo_data$lang_fr))-1
+lovoo_data$lang_en = as.numeric(as.factor(lovoo_data$lang_en))-1
+lovoo_data$lang_de = as.numeric(as.factor(lovoo_data$lang_de))-1
+lovoo_data$lang_it = as.numeric(as.factor(lovoo_data$lang_it))-1
+lovoo_data$lang_es = as.numeric(as.factor(lovoo_data$lang_es))-1
+lovoo_data$lang_pt = as.numeric(as.factor(lovoo_data$lang_pt))-1
+lovoo_data$freshman = as.numeric(as.factor(lovoo_data$freshman))-1
+lovoo_data$hasBirthday = as.numeric(as.factor(lovoo_data$hasBirthday))-1
+lovoo_data$highlighted = as.numeric(as.factor(lovoo_data$highlighted))-1
+
+lovoo_data=lovoo_data[,-1]
+lovoo_data=lovoo_data[,-8]
+lovoo_data$counts_kisses=lovoo_data$counts_kisses/lovoo_data$counts_profileVisits
+lovoo_data=lovoo_data[,-3]
+lovoo_data=na.omit(lovoo_data)
+```
+
+## Knowledge of Lesso regression and upload data
+Lesso approach is to make some regularization so that the regularized fit minimizes the deviance plus a "penalty" on the complexity of the estimate:$$minimize_{\beta\in R} dev(\beta)/n+\lambda\times pen(\lambda)$$. Here $\lambda$ is the penalty weight, while "pen" is some cost function that penalizes departures of the fitted $\beta$ from 0. In order to use "gamlr" function in r programming, we need to create our own numeric feature matrix.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# for gamlr, and many other fitting functions,
+# I need to create your own numeric feature matrix.
+lvx = model.matrix(counts_kisses ~ .-1, data=lovoo_data)
+lvy = lovoo_data$counts_kisses
+```
+
+
+## cross-validation Lesso
+Then we use cross-validation Lesso regression method so that the result will be more robust. 
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# Now without the AIC approximation:
+# cross validated lasso (`verb` just prints progress)
+# this takes a little longer, but still so fast compared to stepwise
+
+lvcvl1 = cv.gamlr(lvx, lvy, nfold=10, standardize=FALSE,family="poisson")
+## plot(lvcvl1, bty="n")
+#lvcvl1.min = coef(lvcvl1, select="min")
+#log(lvcvl1$lambda.min)
+#sum(lvcvl1.min!=0)
+beta_hat=coef(lvcvl1)
+beta_hat
+```
+The result shows that the optimal $log\lambda$ which minimize the test set mean square error is -8.99 and under this level of penalty, the fitted coefficients that are not zero are " age", "counts_pictures", "lang_fr", "lang_de". From these results, we conclude that age, number of pictures on the users' profile and proficiency in French have a positive effect on being loved by more people. However, proficiency in German has a negative effect on their level of charm. These results tell us that being mature will help people attract more people and more pictures on their app profile will also help them become popular since more pictures will tell other people more information about this themselve and help other people know the user better. In addition, people who have a good looking or who are more out-going and more confident prefer to post their picture on their app profile. These type of people also attract more people. Besides, French people are more romantic and they have a higher probability to attract more people on the app. On the other hand， German people are more serious and introverted, that's why the fitted coefficient of knowing German is negative. In addition, from our regression result, we found that our feature matrix is very sparse(i.e, mostly zero), this is especially true since we have lots of factors as features. lasso regression is a great way to improve the efficiency of our model since it screens and ignores zero elements in actually storing X.
+
+# random forest
+A random forest starts from bagging. We still take B bootstrapped samples of the original data and fit a tree to each one, and we still average the predictions of the B different trees. However, it adds more randomness. With each bootstrapped sample, we don't reach over all the features in x when we do our greedy build of a big tree. Instead, we randomly choose a subset of a features sub sample to use in building that tree. The advantages of using fewer features in each tree are that it simplifies each tree, reducing its variance and it diversifies the B trees, decorrelating their predictions.
+
+## read in data
+```{r echo=FALSE, message=FALSE, warning=FALSE, include=FALSE}
+## random forest
+library(tidyverse)
+library(ggplot2)
+library(rpart)
+library(rpart.plot)
+library(rsample) 
+library(randomForest)
+library(lubridate)
+library(modelr)
+library(cowplot)
+library(pdp)
+library(gridExtra)
+library(grid)
+library(lattice)
+# read in data
+lovoo_data = read.csv("/Users/macbookpro/Desktop/lovoo_data.csv")
+
+as.numeric(as.factor(lovoo_data$flirtInterests_chat))-1 
+lovoo_data$flirtInterests_chat = as.numeric(as.factor(lovoo_data$flirtInterests_chat))-1 
+lovoo_data$flirtInterests_date = as.numeric(as.factor(lovoo_data$flirtInterests_date))-1
+lovoo_data$flirtInterests_friends = as.numeric(as.factor(lovoo_data$flirtInterests_friends))-1
+lovoo_data$isVIP = as.numeric(as.factor(lovoo_data$isVIP))-1
+lovoo_data$isVerified = as.numeric(as.factor(lovoo_data$isVerified))-1
+lovoo_data$lang_fr = as.numeric(as.factor(lovoo_data$lang_fr))-1
+lovoo_data$lang_en = as.numeric(as.factor(lovoo_data$lang_en))-1
+lovoo_data$lang_de = as.numeric(as.factor(lovoo_data$lang_de))-1
+lovoo_data$lang_it = as.numeric(as.factor(lovoo_data$lang_it))-1
+lovoo_data$lang_es = as.numeric(as.factor(lovoo_data$lang_es))-1
+lovoo_data$lang_pt = as.numeric(as.factor(lovoo_data$lang_pt))-1
+lovoo_data$freshman = as.numeric(as.factor(lovoo_data$freshman))-1
+lovoo_data$hasBirthday = as.numeric(as.factor(lovoo_data$hasBirthday))-1
+lovoo_data$highlighted = as.numeric(as.factor(lovoo_data$highlighted))-1
+
+lovoo_data=lovoo_data[,-1]
+lovoo_data=lovoo_data[,-8]
+lovoo_data$counts_kisses=lovoo_data$counts_kisses/lovoo_data$counts_profileVisits
+lovoo_data=lovoo_data[,-3]
+lovoo_data=na.omit(lovoo_data)
+```
+
+## building model
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# let's split our data into training and testing
+lv_split =  initial_split(lovoo_data, prop=0.8)
+lv_train = training(lv_split)
+lv_test  = testing(lv_split)
+
+lvforest=randomForest(counts_kisses~age+counts_pictures
+                      +flirtInterests_chat+flirtInterests_friends+flirtInterests_date
+                      +isVIP+isVerified+lang_count+lang_fr+lang_en+lang_de+lang_es
+                      +lang_pt+countDetails+freshman+hasBirthday+highlighted,
+                      data=lv_train,inportance=TRUE)
+# shows out-of-bag MSE as a function of the number of trees used
+#plot(lvforest)
+```
+From the load.forest plot, we found that more trees shows smaller out-off sample MSE. After 500 tress, the partial decresing of MSE becomes very small.
+
+### variable importance plots
+ Then we study how random forests can give us a variable importance measure.
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# variable importance measures
+# how much does mean-squared error increase when we ignore a variable?
+vi = varImpPlot(lvforest)
+```
+The x axis represents that percentage increase in mean square error and the y axis represents different variables. The variable importance plots shows how much omitting each of these variables inflates the MSE of the prediction, higher is worse. From our result plot, we found that "counts_Details", "counts_pictures", "age", "freshman", "lang_fr" and "lang_de" have higher value, which means these variables are more important in this model, they have higher influence on whether an app user will attract more people. This result is rational since completed information on their profile and more pictures on users' profile will provide more information of the user. In addition, users' basic information such as their age and whether they are new user will also provide some information their background and their communication proficiency, which are also key factors decide whether they can attract more people. Finally, people's language will tell us where they come from. People from different country may have different characteristics and their social development environment will also impact their probability of attracting more people.
+
+### partial dependence functions
+
+Then we study the partial importance of each variable which we observe are more important in our variable importance plots. 
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# partial dependence plots
+# these are trying to isolate the partial effect of specific features
+# on the outcome
+page<-partialPlot(lvforest, lv_test, 'age', las=1)
+pcp<-partialPlot(lvforest, lv_test, 'counts_pictures', las=1)
+## partialPlot(lvforest, lv_test, 'flirtInterests_chat')
+##partialPlot(lvforest, lv_test, 'flirtInterests_friends', las=1)
+##partialPlot(lvforest, lv_test, 'flirtInterests_date', las=1)
+##partialPlot(lvforest, lv_test, 'isVIP', las=1)
+##partialPlot(lvforest, lv_test, 'isVerified', las=1)
+##partialPlot(lvforest, lv_test, 'lang_count', las=1)
+partialPlot(lvforest, lv_test, 'lang_fr', las=1)
+##partialPlot(lvforest, lv_test, 'lang_en', las=1)
+partialPlot(lvforest, lv_test, 'lang_de', las=1)
+##partialPlot(lvforest, lv_test, 'lang_it', las=1)
+##partialPlot(lvforest, lv_test, 'lang_es', las=1)
+##partialPlot(lvforest, lv_test, 'lang_pt', las=1)
+partialPlot(lvforest, lv_test, 'countDetails', las=1)
+partialPlot(lvforest, lv_test, 'freshman', las=1)
+##partialPlot(lvforest, lv_test, 'hasBirthday', las=1)
+##partialPlot(lvforest, lv_test, 'highlighted', las=1)
+
+```
+First, from the PD on "age", we found that when people above 20 years old, they are more likely to attract people, especially when people are above 25 years old, the slope of "age" is much higher. It's reasonable since age 20-26 is a period of dating and getting marriage so people during this age are more likely to log onto this app to find their dating mate. Second, from PD on "counts_pictures" and on "counts_Details" the result is rational since  more pictures and more completed profile will tell people more stories about the user which have a positive effect on attracting more people. Third, from language perspective, people speaking French are more likely to attract people but people speaking German are less likely to attract people, since people's characteristic are influenced by their nationality and their growing up environment. Finally, from the PD of the "freshman", it seems that new user are more attractive, since people always like new things. 
