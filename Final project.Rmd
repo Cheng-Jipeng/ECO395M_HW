@@ -15,8 +15,10 @@ In this study, the data from Lovoo will be analyzed. The purpose of this researc
 
 To have more meaningful explanation, this study created an new variable called "conversion rate", which can avoid the problem that the number of liked has highly correlation with the number of clicks (visit times) compared with using $counts_kisses$ as a dependent variable. Also, this indicator can be more effectively explained by other factors.
 
-$Conversion rate = \frac{counts\_kisses}{counts\_profileVisits}$
+\centering
+$Conversion rate = \frac{counts\_kisses}{counts\_profileVisits}$ (1)
 
+\flushleft
 Introduce the question you’re trying to answer at a reason- able level of detail. Give background and motivation for why it’s important.
 
 # Data Description
@@ -27,27 +29,27 @@ The details of each variable presents in the following table.
 
 |Variable   |Description|
 |:---   |:----------|
-|Conversion |Index for converting times of visits to times of likes|
+|conversion |Index for converting times of visits to times of likes, as formula (1)|
 |counts_kisses   |Number of unique user accounts that "liked" (called "kiss" on the platform) this user account|
 |age   |user age|
 |counts_details   |The degree of account completion|
 |counts_pictures   |Number of pictures on the user's profile|
 |counts_profileVisits  |Number of clicks on this user (to see his/her full profile) from other user accounts|
-|flirtInterests_chat   |Whether the user indicated being in search for people to chat with|
-|flirtInterests_friend   |Whether the user indicated being open to making friends|
-|flirtInterests_date  |Whether the user indicated being open to dating people|
+|flirtInterests_chat   |1 if the user indicated being in search for people to chat with|
+|flirtInterests_friend   |1 if the user indicated being open to making friends|
+|flirtInterests_date  |1 if the user indicated being open to dating people|
 |isVip   |1 if the user is VIP (this status came with benefits)|
 |isVerified  |Whether the user's account was verified through one of the methods (Facebook, phone number, ...)|
 |lang_count   |Number of languages the user knows|
-|lang_fr   |Whether the user knows French|
-|lang_en  |Whether the user knows English|
-|lang_de   |Whether the user knows German|
-|lang_it   |Whether the user knows Italian|
-|lang_es   |Whether the user knows Spanish|
-|lang_pt   |Whether the user knows Portuguese|
-|freshman   |????|
-|hasBirthday  |Whether the user has birthday|
-|highlighted   |Whether the user's profile is currently highlighted (at fetch time)|
+|lang_fr   |1 if the user can speak French|
+|lang_en  |1 if the user can speak English|
+|lang_de   |1 if the user can speak German|
+|lang_it   |1 if the user can speak Italian|
+|lang_es   |1 if the user can speak Spanish|
+|lang_pt   |1 if the user can speak Portuguese|
+|freshman   |1 if the user register no more than one month|
+|hasBirthday  |1 if the user has birthday|
+|highlighted   |1 if the user's profile is currently highlighted (at fetch time)|
 
 # Methods (Model)
 Describe your data set and the methods you will use to analyze it.
