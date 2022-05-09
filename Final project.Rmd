@@ -62,6 +62,7 @@ Table 1: Variable Descriptions
 ## Unsupervised Leanring for Market Segmentation
 \flushleft
 We would employ some unsupervised learning techniques to divide users into different groups, which could give us informative user profiles. Given that the data contains both continuous and binary features, we would apply a generalized version principal component analysis (PCA) method called **PCAmix** for dimension reduction. More specifically, PCAmix imposes standard PCA on quantitative features and multiple correspondence analysis (MCA) on qualitative features. This allows us to perform clustering techniques like **Kmeans++** on the principal components that PCAmix provided us.  
+
 ## Supervised Learning Model for Prediction and Causal Inference
 \flushleft
 In order to analyze what features will help app users attract more romance, we decide to employ **LASSO regression** and **Random Forest** methods. As we all know, LASSO regression as a linear regression will give us more robust and understandable coefficients. Random forest method, on the other hand, will give us better fits but less interpretability. A complementary approach would be combining these two methods and comparing their results, which is what we are going to proceed with.
@@ -72,7 +73,7 @@ In order to analyze what features will help app users attract more romance, we d
 We would like to start with Figure \@ref(fig:fig1) to extract some key information from the dataset. The top panel shows that multilingual do not prevail over other monolinguals; on the other hand, speaking French only seems very "hot". Many French speakers are very efficient in converting profile visits to likes with few pictures, and do not show clear intention about whether they want a chat, friend, or date. Mystery makes them extraordinaire! Note that in general, users with unclear intentions (like `None`) would post fewer photos on their profiles, who might want to keep mysterious (as those French speakers do!), protect their privacy, or even happen to be not passionate enough, while users with mediate intentions (like `Chat` and `Friend`) tend to post more pictures than those with strong intentions (`Date`). This suggests that making friends might require more sincerity.   
 \flushleft
 The bottom panel of Figure \@ref(fig:fig1) provides more demographic characteristics of the observations. Iberian (Spanish and Portuguese) speakers are more straightforward about their desire for a date, while Italian is shyer about the same thing. There is a larger portion of French speakers (as well as those multilingual) are young users, and the converse happens to speakers of other languages. These fancy results, nevertheless, echo some stereotypes.  
-```{r fig1, fig.align='center', fig.cap="Value of features for wines of different colors", warning=FALSE, echo=FALSE, message=FALSE, alert=FALSE}
+```{r fig1, fig.align='center', fig.cap="Preliminary Data Visualization", warning=FALSE, echo=FALSE, message=FALSE, alert=FALSE}
 library(RCurl)
 library(tidyverse)
 library(mosaic)
@@ -131,6 +132,7 @@ eda1 = ggplot(lovoo_data_plot) +
 eda2 = ggplot(lovoo_data_plot) + 
   geom_bar(aes(x=factor(age), fill = intention)) +
   facet_wrap(~lang_speak, scales = "free") +
+  xlab("age")
   labs(color='Intention')+
   scale_fill_discrete(breaks=c('None', 'Chat', 'Friend','Date'))
 ggarrange(eda1, eda2, common.legend = TRUE, nrow=2,
@@ -139,7 +141,7 @@ ggarrange(eda1, eda2, common.legend = TRUE, nrow=2,
 ### PCAmix and Clustering with Kmeans++
 After taking a first impression on Lovoo's users from data visualization, we would like to dive into the segmentation of these users. A powerful and conventional approach would be running clustering algorithms after conducting PCA, which is expected to improve the performance of clustering because more noises are ignored. Thus, we first run **PCAmix** on the dataset (without labels like `counts_kisses`, `counts_profileVisits` and `conversion`) and consider the first 4 principal components (`PC1`,`PC2`,`PC3`,`PC4`) given the drop of the 4th principal component's contribution to explaining the total variations. Especially, `PC1` contrasts the scores of `lang_en` and `lang_es` together with `lang_count`, `PC2` contrasts `lang_fr` `and lang_de`, `PC3` indicates the accessibility of a user's information (relevant to `freshman`, `counts_pictures`, `isVerified`), and `PC4` captures user's intentions. 
 Then we try to pick an "optimal" number of clusters, i.e. $k$; though calculation suggests that $k=4$ maximizes the CH index, $k=3$ does make more sense. Performing **Kmeans++** with $k=3$ on the 4 principal components gives Figure \@ref(fig:fig2). 
-```{r fig2, fig.align='center', fig.cap="Value of features for wines of different colors", warning=FALSE, echo=FALSE, message=FALSE, alert=FALSE}
+```{r fig2, fig.align='center', fig.cap="Clustering Results", warning=FALSE, echo=FALSE, message=FALSE, alert=FALSE}
 # PCAmix
 ## Factorize binary variable
 lovoo_data$flirtInterests_chat = factor(lovoo_data$flirtInterests_chat) 
