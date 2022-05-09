@@ -2,16 +2,19 @@
 title: "Final porject_title"
 author: "Yu-Ting Huang, Jipeng Cheng, Weidi Hou"
 date: "5/1/2022"
-output: pdf_document
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
 ---
 
 # Abstract
 summarize your question, your methods, your results, and your main conclusions in a few hundred words or less.
 
 # Introduction
-The importance and influence of dating app cannot be ignored in today's society. For example, "The Tinder Swindler" is one of famous movie in 2022, specially,  global views was 45.8 million hours in its first week of release and hit the top 10 in 92 countries in Netflix. Furthermore, the application "Tinder - Dating New People" is super popular in the US and over 55 billion matches made. Of course, except for Tinder, there are so many dating app such as OkCupid, bumble, and Coffee Meets Bagel to name but a few. 
+The importance and influence of dating app cannot be ignored in today's society. For example, "The Tinder Swindler" is one of famous movie in 2022, specially,  global views was 45.8 million hours in its first week of release and hit the top 10 in 92 countries in Netflix. Furthermore, the application "Tinder - Dating New People" is super popular in the US and over 55 billion matches made. Of course, except for Tinder, there are so many dating app such as OkCupid, bumble, and Coffee Meets Bagel to name but a few, they have different features to attract different groups.
 
-In this study, the data from Lovoo will be analyzed. The purpose of this research is to build the model and point out what profile can acquire more "likes" (called "kiss" on the Lovoo), as a indicator to capture the potential charisma of people. On the other hand, more "likes" means the person may get more matches and more potential encounters. The one things should be noticed is that our data only collect the sample from "female". Therefore, the results will be fitted for female rather than male.
+In this study, the data from Lovoo will be analyzed. The purpose of this research is to build the model and point out what profile and specific factors can acquire more "likes" (called "kiss" on the Lovoo), as a indicator to capture the potential charisma of people. On the other hand,  as we know that more "likes" means the person may get more matches and more potential encounters. The one things should be noticed is that our data only collect the sample from "female". Therefore, the results will be fitted for female rather than male.
 
 To have more meaningful explanation, this study created an new variable called "conversion rate", which can avoid the problem that the number of liked has highly correlation with the number of clicks (visit times) compared with using `counts_kisses` as a dependent variable. Also, this indicator can effectively explain how to obtain more like from other user by other independent variables.
 
