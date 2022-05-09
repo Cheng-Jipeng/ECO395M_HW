@@ -58,7 +58,7 @@ Table 1: Variable Descriptions
 |freshman   |1 if the user register no more than one month|
 |hasBirthday  |1 if the user has birthday|
 |highlighted   |1 if the user's profile is currently highlighted (at fetch time)|
-
+\flushleft
 ## Unsupervised Leanring for Market Segmentation
 \flushleft
 We would employ some unsupervised learning techniques to divide users into different groups, which could give us informative user profiles. Given that the data contains both continuous and binary features, we would apply a generalized version principal component analysis (PCA) method called **PCAmix** for dimension reduction. More specifically, PCAmix imposes standard PCA on quantitative features and multiple correspondence analysis (MCA) on qualitative features. This allows us to perform clustering techniques like **Kmeans++** on the principal components that PCAmix provided us.  
