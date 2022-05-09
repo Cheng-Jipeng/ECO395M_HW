@@ -95,7 +95,10 @@ lovoo_data=lovoo_data[,-3]
 lovoo_data=na.omit(lovoo_data)
 ```
 \flushleft
-Lesso approach is to make some regularization so that the regularized fit minimizes the deviance plus a **penalty** on the complexity of the estimate:$minimize_{\beta\in R} dev(\beta)/n+\lambda\times pen(\lambda)$ (2). 
+Lesso approach is to make some regularization so that the regularized fit minimizes the deviance plus a **penalty** on the complexity of the estimate:
+
+\centering
+$minimize_{\beta\in R} dev(\beta)/n+\lambda\times pen(\lambda)$ (2). 
 
 \flushleft
 Here $\lambda$ is the penalty weight, while **pen** is some cost function that penalizes departures of the fitted $\beta$ from 0. In order to use **gamlr** function in r programming, we need to create our own numeric feature matrix.
