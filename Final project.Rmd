@@ -70,9 +70,7 @@ In order to analyze what features will help app users attract more romance, we d
 # Results
 ## Exploratory Data Analysis and Unsupervised Learning
 ### Visualization
-We would like to start with Figure \@ref(fig:fig1) to extract some key information from the dataset. The top panel shows that multilingual do not prevail over other monolinguals; on the other hand, speaking French only seems very "hot". Many French speakers are very efficient in converting profile visits to likes with few pictures, and do not show clear intention about whether they want a chat, friend, or date. Mystery makes them extraordinaire! Note that in general, users with unclear intentions (like `None`) would post fewer photos on their profiles, who might want to keep mysterious (as those French speakers do!), protect their privacy, or even happen to be not passionate enough, while users with mediate intentions (like `Chat` and `Friend`) tend to post more pictures than those with strong intentions (`Date`). This suggests that making friends might require more sincerity.   
-\flushleft
-The bottom panel of Figure \@ref(fig:fig1) provides more demographic characteristics of the observations. Iberian (Spanish and Portuguese) speakers are more straightforward about their desire for a date, while Italian is shyer about the same thing. There is a larger portion of French speakers (as well as those multilingual) are young users, and the converse happens to speakers of other languages. These fancy results, nevertheless, echo some stereotypes.  
+ 
 ```{r fig1, fig.align='center', fig.cap="Preliminary Data Visualization", warning=FALSE, echo=FALSE, message=FALSE, alert=FALSE}
 library(RCurl)
 library(tidyverse)
@@ -89,7 +87,7 @@ library(ggplot2)
 lovoo_data = read.csv("https://raw.githubusercontent.com/Cheng-Jipeng/ECO395M_HW/main/lovoo_data.csv") %>%
   select(-c(gender,connectedToFacebook)) %>%
   mutate(conversion = counts_kisses/counts_profileVisits) %>%
-  na.omit
+  na.omit()
 
 # Convert factor to numeric binary
 lovoo_data_plot = lovoo_data
@@ -132,15 +130,20 @@ eda1 = ggplot(lovoo_data_plot) +
 eda2 = ggplot(lovoo_data_plot) + 
   geom_bar(aes(x=factor(age), fill = intention)) +
   facet_wrap(~lang_speak, scales = "free") +
-  xlab("age")
+  xlab("age") +
   labs(color='Intention')+
   scale_fill_discrete(breaks=c('None', 'Chat', 'Friend','Date'))
 ggarrange(eda1, eda2, common.legend = TRUE, nrow=2,
           legend = "bottom")
 ```
+
+\flushleft
+We would like to start with Figure \@ref(fig:fig1) to extract some key information from the dataset. The top panel shows that multilingual do not prevail over other monolinguals; on the other hand, speaking French only seems very "hot". Many French speakers are very efficient in converting profile visits to likes with few pictures, and do not show clear intention about whether they want a chat, friend, or date. Mystery makes them extraordinaire! Note that in general, users with unclear intentions (like `None`) would post fewer photos on their profiles, who might want to keep mysterious (as those French speakers do!), protect their privacy, or even happen to be not passionate enough, while users with mediate intentions (like `Chat` and `Friend`) tend to post more pictures than those with strong intentions (`Date`). This suggests that making friends might require more sincerity.   
+\flushleft
+The bottom panel of Figure \@ref(fig:fig1) provides more demographic characteristics of the observations. Iberian (Spanish and Portuguese) speakers are more straightforward about their desire for a date, while Italian is shyer about the same thing. There is a larger portion of French speakers (as well as those multilingual) are young users, and the converse happens to speakers of other languages. These fancy results, nevertheless, echo some stereotypes. 
+
 ### PCAmix and Clustering with Kmeans++
-After taking a first impression on Lovoo's users from data visualization, we would like to dive into the segmentation of these users. A powerful and conventional approach would be running clustering algorithms after conducting PCA, which is expected to improve the performance of clustering because more noises are ignored. Thus, we first run **PCAmix** on the dataset (without labels like `counts_kisses`, `counts_profileVisits` and `conversion`) and consider the first 4 principal components (`PC1`,`PC2`,`PC3`,`PC4`) given the drop of the 4th principal component's contribution to explaining the total variations. Especially, `PC1` contrasts the scores of `lang_en` and `lang_es` together with `lang_count`, `PC2` contrasts `lang_fr` `and lang_de`, `PC3` indicates the accessibility of a user's information (relevant to `freshman`, `counts_pictures`, `isVerified`), and `PC4` captures user's intentions. 
-Then we try to pick an "optimal" number of clusters, i.e. $k$; though calculation suggests that $k=4$ maximizes the CH index, $k=3$ does make more sense. Performing **Kmeans++** with $k=3$ on the 4 principal components gives Figure \@ref(fig:fig2). 
+
 ```{r fig2, fig.align='center', fig.cap="Clustering Results", warning=FALSE, echo=FALSE, message=FALSE, alert=FALSE}
 # PCAmix
 ## Factorize binary variable
@@ -230,6 +233,11 @@ clus2 = ggplot(lovoo_data) +
 ggarrange(clus1, clus2, common.legend = TRUE,
           legend = "bottom")
 ```
+
+\flushleft
+After taking a first impression on Lovoo's users from data visualization, we would like to dive into the segmentation of these users. A powerful and conventional approach would be running clustering algorithms after conducting PCA, which is expected to improve the performance of clustering because more noises are ignored. Thus, we first run **PCAmix** on the dataset (without labels like `counts_kisses`, `counts_profileVisits` and `conversion`) and consider the first 4 principal components (`PC1`,`PC2`,`PC3`,`PC4`) given the drop of the 4th principal component's contribution to explaining the total variations. Especially, `PC1` contrasts the scores of `lang_en` and `lang_es` together with `lang_count`, `PC2` contrasts `lang_fr` `and lang_de`, `PC3` indicates the accessibility of a user's information (relevant to `freshman`, `counts_pictures`, `isVerified`), and `PC4` captures user's intentions. \flushleft
+Then we try to pick an "optimal" number of clusters, i.e. $k$; though calculation suggests that $k=4$ maximizes the CH index, $k=3$ does make more sense. Performing **Kmeans++** with $k=3$ on the 4 principal components gives Figure \@ref(fig:fig2). 
+\flushleft
 The left panel of Figure \@ref(fig:fig2) illustrates sharp contrasts between cluster 1 and cluster 3. Cluster 3 should refer to users who have extraordinary charms (maybe those French speakers) in the sense that they are surprisingly attractive to profile visitors so that visitors are really likely to like them. On the contrary, cluster 1 represents normal people since they need a lot more visits to have the same number of "kisses" as cluster 3; in a word, their search cost of dating can be higher! The right panel indicates the existence of cluster 2, which has a frigid attitude to dating because they really do not care about their profiles (and do not post much information). Their conversion rate, as expected, is lower on average than the other 2 clusters.
 \flushleft
 The outcome of unsupervised learning describes the in-sample user portraits. Next, we will tackle the real problem: what determines your attractiveness on a dating app?
